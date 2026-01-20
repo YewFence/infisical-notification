@@ -134,25 +134,24 @@ func verifySignature(bodyText, headerValue, secret string, now time.Time) error 
 }
 
 func parseSignatureHeader(headerValue string) (int64, string, error) {
-	var timestampText string
-	var signature string
-
-	parts := strings.Split(headerValue, ";")
-	for _, part := range parts {
-		item := strings.TrimSpace(part)
-		switch {
-		case strings.HasPrefix(item, "t="):
-			timestampText = strings.TrimPrefix(item, "t=")
-		case strings.HasPrefix(item, "sig="):
-			signature = strings.TrimPrefix(item, "sig=")
-		case strings.HasPrefix(item, "signature="):
-			signature = strings.TrimPrefix(item, "signature=")
-		case item != "" && signature == "":
-			signature = item
-		}
+	trimmed := strings.TrimSpace(headerValue)
+	if trimmed == "" {
+		return 0, "", errors.New("invalid signature header format")
 	}
 
-	if timestampText == "" || signature == "" {
+	parts := strings.SplitN(trimmed, ";", 2)
+	if len(parts) != 2 {
+		return 0, "", errors.New("invalid signature header format")
+	}
+
+	timestampPart := strings.TrimSpace(parts[0])
+	signature := strings.TrimSpace(parts[1])
+	if !strings.HasPrefix(timestampPart, "t=") || signature == "" {
+		return 0, "", errors.New("invalid signature header format")
+	}
+
+	timestampText := strings.TrimPrefix(timestampPart, "t=")
+	if timestampText == "" {
 		return 0, "", errors.New("invalid signature header format")
 	}
 
