@@ -1,4 +1,5 @@
-// TODO CRUD 处理器，提供列表与状态更新。
+// Package handlers 实现了具体的业务逻辑处理器 (Controller)。
+// 这里处理与 Todo 相关的 HTTP 请求。
 package handlers
 
 import (
@@ -14,20 +15,24 @@ import (
 	"gorm.io/gorm"
 )
 
-// TodoHandler handles CRUD requests for todo items.
+// TodoHandler 结构体持有 Repository 的引用。
+// 这样可以在处理请求时调用数据库操作。
 type TodoHandler struct {
 	repo *repo.TodoRepository
 }
 
-// NewTodoHandler builds a new handler instance.
+// NewTodoHandler 创建一个新的 TodoHandler。
 func NewTodoHandler(repo *repo.TodoRepository) *TodoHandler {
 	return &TodoHandler{repo: repo}
 }
 
+// todoInput 定义了创建/更新接口的请求体结构。
 type todoInput struct {
 	SecretPath string `json:"secretPath"`
 }
 
+// List 获取所有待办事项列表。
+// GET /api/todos
 func (h *TodoHandler) List(c *gin.Context) {
 	items, err := h.repo.List()
 	if err != nil {
@@ -35,6 +40,7 @@ func (h *TodoHandler) List(c *gin.Context) {
 		return
 	}
 
+	// 将数据库模型切片转换为响应模型切片
 	response := make([]TodoResponse, 0, len(items))
 	for _, item := range items {
 		response = append(response, toTodoResponse(item))
@@ -42,8 +48,12 @@ func (h *TodoHandler) List(c *gin.Context) {
 	respondOK(c, response)
 }
 
+// Create 创建新的待办事项。
+// POST /api/todos
 func (h *TodoHandler) Create(c *gin.Context) {
 	var input todoInput
+	// ShouldBindJSON 解析请求体中的 JSON 并绑定到 input 结构体。
+	// 如果 JSON 格式错误或字段类型不匹配，返回 error。
 	if err := c.ShouldBindJSON(&input); err != nil {
 		respondError(c, http.StatusBadRequest, "invalid request body")
 		return
@@ -57,6 +67,7 @@ func (h *TodoHandler) Create(c *gin.Context) {
 
 	item, err := h.repo.Create(secretPath, time.Now().UTC())
 	if err != nil {
+		// 检查是否是唯一性约束错误 (SQLite 错误码处理比较麻烦，这里用简单的字符串匹配)
 		if isUniqueConstraintError(err) {
 			respondError(c, http.StatusConflict, "secretPath already exists")
 			return
@@ -68,7 +79,10 @@ func (h *TodoHandler) Create(c *gin.Context) {
 	respondOK(c, toTodoResponse(item))
 }
 
+// Update 更新待办事项的内容 (SecretPath)。
+// PATCH /api/todos/:id
 func (h *TodoHandler) Update(c *gin.Context) {
+	// 从 URL 参数获取 ID
 	id, ok := parseID(c)
 	if !ok {
 		return
@@ -103,6 +117,8 @@ func (h *TodoHandler) Update(c *gin.Context) {
 	respondOK(c, toTodoResponse(item))
 }
 
+// Delete 删除待办事项。
+// DELETE /api/todos/:id
 func (h *TodoHandler) Delete(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
@@ -121,6 +137,8 @@ func (h *TodoHandler) Delete(c *gin.Context) {
 	respondOK(c, true)
 }
 
+// Complete 将待办事项标记为完成。
+// POST /api/todos/:id/complete
 func (h *TodoHandler) Complete(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
@@ -140,6 +158,8 @@ func (h *TodoHandler) Complete(c *gin.Context) {
 	respondOK(c, toTodoResponse(item))
 }
 
+// parseID 辅助函数：从 URL 路径参数中解析 uint 类型的 ID。
+// 示例：/api/todos/123 -> 123
 func parseID(c *gin.Context) (uint, bool) {
 	idText := strings.TrimSpace(c.Param("id"))
 	idValue, err := strconv.ParseUint(idText, 10, 64)
@@ -150,10 +170,11 @@ func parseID(c *gin.Context) (uint, bool) {
 	return uint(idValue), true
 }
 
+// isUniqueConstraintError 辅助函数：判断错误是否由唯一键冲突引起。
+// 简单通过错误信息字符串包含 "unique" 来判断。
 func isUniqueConstraintError(err error) bool {
 	if err == nil {
 		return false
 	}
 	return strings.Contains(strings.ToLower(err.Error()), "unique")
 }
-

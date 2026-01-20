@@ -1,4 +1,4 @@
-// Webhook 处理器，负责校验签名并入库。
+// Package handlers 包含 Webhook 相关的处理逻辑。
 package handlers
 
 import (
@@ -14,22 +14,26 @@ import (
 )
 
 const (
-	signatureHeader      = "x-infisical-signature"
+	// Infisical 发送的签名头
+	signatureHeader = "x-infisical-signature"
+	
+	// 支持的事件类型
 	eventSecretsModified = "secrets.modified"
 	eventTest            = "test"
 )
 
-// WebhookHandler handles Infisical webhook events.
+// WebhookHandler 专门处理 Webhook 请求。
 type WebhookHandler struct {
 	repo   *repo.TodoRepository
-	secret string
+	secret string // 用于验证签名的密钥
 }
 
-// NewWebhookHandler constructs a webhook handler.
+// NewWebhookHandler 创建 WebhookHandler 实例。
 func NewWebhookHandler(repo *repo.TodoRepository, secret string) *WebhookHandler {
 	return &WebhookHandler{repo: repo, secret: strings.TrimSpace(secret)}
 }
 
+// webhookPayload 定义了 Infisical Webhook 的 JSON 载荷结构。
 type webhookPayload struct {
 	Event   string `json:"event"`
 	Project struct {
@@ -38,7 +42,11 @@ type webhookPayload struct {
 	Timestamp int64 `json:"timestamp"`
 }
 
+// Handle 处理 Webhook 请求的主要逻辑。
 func (h *WebhookHandler) Handle(c *gin.Context) {
+	// 1. 获取原始请求体 (Raw Data)
+	// 验证签名需要原始的字节流，而不是解析后的 JSON 对象。
+	// 任何对 JSON 的微小改动（如空格）都会导致签名验证失败。
 	bodyBytes, err := c.GetRawData()
 	if err != nil {
 		respondError(c, http.StatusBadRequest, "read body failed")
@@ -51,43 +59,53 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 		return
 	}
 
+	// 2. 检查系统是否配置了 Webhook Secret
 	if strings.TrimSpace(h.secret) == "" {
 		respondError(c, http.StatusInternalServerError, "missing webhook secret")
 		return
 	}
 
+	// 3. 获取签名头
 	signatureHeaderValue := strings.TrimSpace(c.GetHeader(signatureHeader))
 	if signatureHeaderValue == "" {
 		respondError(c, http.StatusBadRequest, "missing signature header")
 		return
 	}
 
+	// 4. 验证签名
+	// 调用 signature 包的逻辑，确保请求确实来自 Infisical 且未被篡改。
 	if err := signature.VerifySignature(bodyText, signatureHeaderValue, h.secret, time.Now().UTC()); err != nil {
 		respondError(c, http.StatusUnauthorized, "invalid signature")
 		return
 	}
 
+	// 5. 解析 JSON 载荷
 	var payload webhookPayload
 	if err := json.Unmarshal(bodyBytes, &payload); err != nil {
 		respondError(c, http.StatusBadRequest, "invalid payload")
 		return
 	}
 
+	// 6. 过滤事件类型
 	if !isSupportedEvent(payload.Event) {
 		respondOK(c, "ignored")
 		return
 	}
 
+	// 测试事件直接返回 OK
 	if payload.Event == eventTest {
 		respondOK(c, "ok")
 		return
 	}
 
+	// 7. 处理业务逻辑
+	// 提取 secretPath，如果没有则默认为根路径 "/"
 	secretPath := strings.TrimSpace(payload.Project.SecretPath)
 	if secretPath == "" {
 		secretPath = "/"
 	}
 
+	// 更新或插入 Todo 项
 	item, err := h.repo.UpsertFromWebhook(secretPath, time.Now().UTC())
 	if err != nil {
 		respondError(c, http.StatusInternalServerError, "upsert todo failed")
@@ -105,4 +123,3 @@ func isSupportedEvent(event string) bool {
 		return false
 	}
 }
-
