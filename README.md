@@ -1,6 +1,6 @@
 Infisical 通知转发器（Appwrite）
 
-这是一个很小巧的 Appwrite Function：接收 Infisical 的 webhook，校验签名后只处理 `secrets.modified` 事件，并把消息转发到你自定义的 Apprise。
+这是一个很小巧的 Appwrite Function：接收 Infisical 的 webhook，校验签名后只处理 `secrets.modified` 和 `test` 事件，并把消息转发到你自定义的 Apprise。
 
 主要流程
 - 接收 Infisical webhook 请求
@@ -18,5 +18,5 @@ Infisical 通知转发器（Appwrite）
 - 会注入 `SecretPath`，用于展示本次变更的路径
 
 备注
-- 只处理事件：`secrets.modified`
+- 只处理事件：`secrets.modified` `test`
 - 非法签名或无效负载会直接返回错误信息
