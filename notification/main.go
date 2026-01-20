@@ -24,6 +24,7 @@ import (
 const (
 	signatureHeader      = "x-infisical-signature"
 	eventSecretsModified = "secrets.modified"
+	eventTest            = "test"
 	replayWindow         = 5 * time.Minute
 	messageTemplateFile  = "message.md"
 )
@@ -36,6 +37,7 @@ type webhookPayload struct {
 }
 
 type messageData struct {
+	Event      string
 	SecretPath string
 }
 
@@ -69,7 +71,7 @@ func Main(context openruntimes.Context) openruntimes.Response {
 		return context.Res.Text("invalid payload")
 	}
 
-	if payload.Event != eventSecretsModified {
+	if !isSupportedEvent(payload.Event) {
 		return context.Res.Text("ignored")
 	}
 
@@ -90,13 +92,16 @@ func Main(context openruntimes.Context) openruntimes.Response {
 		secretPath = "/"
 	}
 
-	messageBody, err := renderMessage(secretPath)
+	messageBody, err := renderMessage(payload.Event, secretPath)
 	if err != nil {
 		context.Log(fmt.Sprintf("render message failed: %v", err))
 		return context.Res.Text("render error")
 	}
 
 	title := "Infisical secrets updated"
+	if payload.Event == eventTest {
+		title = "Infisical webhook test"
+	}
 	if err := sendApprise(appriseURL, notificationURLs, title, messageBody); err != nil {
 		context.Log(fmt.Sprintf("apprise request failed: %v", err))
 		return context.Res.Text("notify failed")
@@ -198,7 +203,7 @@ func decodeSignature(signature string) ([]byte, error) {
 	return nil, errors.New("unsupported signature encoding")
 }
 
-func renderMessage(secretPath string) (string, error) {
+func renderMessage(event, secretPath string) (string, error) {
 	content, err := os.ReadFile(messageTemplateFile)
 	if err != nil {
 		return "", err
@@ -210,11 +215,20 @@ func renderMessage(secretPath string) (string, error) {
 	}
 
 	var builder strings.Builder
-	if err := tmpl.Execute(&builder, messageData{SecretPath: secretPath}); err != nil {
+	if err := tmpl.Execute(&builder, messageData{Event: event, SecretPath: secretPath}); err != nil {
 		return "", err
 	}
 
 	return builder.String(), nil
+}
+
+func isSupportedEvent(event string) bool {
+	switch event {
+	case eventSecretsModified, eventTest:
+		return true
+	default:
+		return false
+	}
 }
 
 func sendApprise(appriseURL, notificationURLs, title, body string) error {

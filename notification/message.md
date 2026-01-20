@@ -1,8 +1,8 @@
 # Infisical Update
 
-Heads up! Your Infisical secrets were modified.
+Heads up! An Infisical webhook event was received.
 
-- Event: `secrets.modified`
+- Event: `{{ .Event }}`
 - Path: `{{ .SecretPath }}`
 
 Please check the Infisical console if you want more details.
