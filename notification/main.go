@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
+	_ "embed"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -26,8 +27,12 @@ const (
 	eventSecretsModified = "secrets.modified"
 	eventTest            = "test"
 	replayWindow         = 5 * time.Minute
-	messageTemplateFile  = "message.md"
 )
+
+// messageTemplate is embedded at build time to avoid runtime file dependencies.
+//
+//go:embed message.md
+var messageTemplate string
 
 type webhookPayload struct {
 	Event   string `json:"event"`
@@ -203,12 +208,7 @@ func decodeSignature(signature string) ([]byte, error) {
 }
 
 func renderMessage(event, secretPath string) (string, error) {
-	content, err := os.ReadFile(messageTemplateFile)
-	if err != nil {
-		return "", err
-	}
-
-	tmpl, err := template.New("message").Option("missingkey=error").Parse(string(content))
+	tmpl, err := template.New("message").Option("missingkey=error").Parse(messageTemplate)
 	if err != nil {
 		return "", err
 	}
