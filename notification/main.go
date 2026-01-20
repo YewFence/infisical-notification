@@ -40,7 +40,7 @@ type messageData struct {
 }
 
 func Main(context openruntimes.Context) openruntimes.Response {
-	bodyText := context.Req.BodyText
+	bodyText := context.Req.BodyText()
 	if strings.TrimSpace(bodyText) == "" {
 		context.Log("empty request body")
 		return context.Res.Text("empty body")
