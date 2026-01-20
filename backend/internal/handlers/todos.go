@@ -28,6 +28,7 @@ func NewTodoHandler(repo *repo.TodoRepository) *TodoHandler {
 
 // todoInput 定义了创建/更新接口的请求体结构。
 type todoInput struct {
+	// 反射标签指定了 JSON 字段名。
 	SecretPath string `json:"secretPath"`
 }
 
@@ -67,8 +68,7 @@ func (h *TodoHandler) Create(c *gin.Context) {
 
 	item, err := h.repo.Create(secretPath, time.Now().UTC())
 	if err != nil {
-		// 检查是否是唯一性约束错误 (SQLite 错误码处理比较麻烦，这里用简单的字符串匹配)
-		if isUniqueConstraintError(err) {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			respondError(c, http.StatusConflict, "secretPath already exists")
 			return
 		}
@@ -106,7 +106,7 @@ func (h *TodoHandler) Update(c *gin.Context) {
 			respondError(c, http.StatusNotFound, "todo not found")
 			return
 		}
-		if isUniqueConstraintError(err) {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			respondError(c, http.StatusConflict, "secretPath already exists")
 			return
 		}
@@ -168,13 +168,4 @@ func parseID(c *gin.Context) (uint, bool) {
 		return 0, false
 	}
 	return uint(idValue), true
-}
-
-// isUniqueConstraintError 辅助函数：判断错误是否由唯一键冲突引起。
-// 简单通过错误信息字符串包含 "unique" 来判断。
-func isUniqueConstraintError(err error) bool {
-	if err == nil {
-		return false
-	}
-	return strings.Contains(strings.ToLower(err.Error()), "unique")
 }
