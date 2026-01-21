@@ -5,6 +5,8 @@ package main
 import (
 	"log"
 
+	"github.com/joho/godotenv"
+
 	"backend/internal/config"
 	"backend/internal/db"
 	"backend/internal/models"
@@ -15,6 +17,11 @@ import (
 // main 函数是程序的执行入口，类似于 Python 的 if __name__ == "__main__": 下的代码。
 // 这里负责组装各个组件（配置、数据库、路由）并启动 Web 服务。
 func main() {
+	// 0. 加载 .env 文件（如果存在）
+	// 在开发环境中，可以通过 .env 文件设置环境变量。
+	// 生产环境通常直接使用系统环境变量，所以这里忽略文件不存在的错误。
+	_ = godotenv.Load()
+
 	// 1. 加载配置
 	// 从环境变量中读取配置信息，如果未设置则使用默认值。
 	// 这符合 "12-Factor App" 的推荐实践。
