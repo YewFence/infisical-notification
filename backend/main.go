@@ -15,11 +15,7 @@
 //	@host						localhost:8080
 //	@BasePath					/api/todos
 //	@schemes					http https
-//
-//	@securityDefinitions.apikey	WebhookSecret
-//	@in							header
-//	@name						X-Infisical-Signature
-//	@description				Infisical Webhook 签名验证
+
 package main
 
 import (

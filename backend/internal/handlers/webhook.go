@@ -52,17 +52,19 @@ type webhookPayload struct {
 //
 //	@Summary		接收 Infisical Webhook
 //	@Description	接收来自 Infisical 的 Webhook 通知并创建或更新待办事项
+//	@Description	注意：此接口使用 HMAC-SHA256 签名验证，需要在 X-Infisical-Signature 头中提供正确的签名
+//	@Description	签名格式：t=<timestamp>,v1=<signature>，其中 signature = HMAC-SHA256(secret, timestamp + "." + requestBody)
+//	@Description	secret 通过环境变量 INFISICAL_WEBHOOK_SECRET 配置
 //	@Tags			webhook
 //	@Accept			json
 //	@Produce		json
-//	@Param			X-Infisical-Signature	header		string					true	"Webhook 签名"
+//	@Param			X-Infisical-Signature	header		string					true	"Webhook 签名（格式：t=timestamp,v1=signature）"
 //	@Param			payload					body		webhookPayload			true	"Webhook 载荷"
 //	@Success		200						{object}	map[string]interface{}	"成功处理 Webhook"
 //	@Failure		400						{object}	map[string]string		"请求参数错误"
 //	@Failure		401						{object}	map[string]string		"签名验证失败"
 //	@Failure		500						{object}	map[string]string		"服务器内部错误"
 //	@Router			/webhook [post]
-//	@Security		WebhookSecret
 func (h *WebhookHandler) Handle(c *gin.Context) {
 	// 1. 获取原始请求体 (Raw Data)
 	// 验证签名需要原始的字节流，而不是解析后的 JSON 对象。
