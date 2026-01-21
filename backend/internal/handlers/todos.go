@@ -156,11 +156,11 @@ func (h *TodoHandler) Update(c *gin.Context) {
 //	@Tags			todos
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int					true	"待办事项 ID"
-//	@Success		200	{object}	map[string]bool		"成功删除"
-//	@Failure		400	{object}	map[string]string	"请求参数错误"
-//	@Failure		404	{object}	map[string]string	"待办事项不存在"
-//	@Failure		500	{object}	map[string]string	"服务器内部错误"
+//	@Param			id	path		int						true	"待办事项 ID"
+//	@Success		200	{object}	map[string]string    	"成功删除"
+//	@Failure		400	{object}	map[string]string		"请求参数错误"
+//	@Failure		404	{object}	map[string]string		"待办事项不存在"
+//	@Failure		500	{object}	map[string]string		"服务器内部错误"
 //	@Router			/{id} [delete]
 func (h *TodoHandler) Delete(c *gin.Context) {
 	id, ok := parseID(c)
@@ -177,7 +177,7 @@ func (h *TodoHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	respondOK(c, true)
+	respondOK(c, "ok")
 }
 
 // Complete 将待办事项标记为完成。
