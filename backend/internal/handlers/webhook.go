@@ -16,7 +16,7 @@ import (
 const (
 	// Infisical 发送的签名头
 	signatureHeader = "x-infisical-signature"
-	
+
 	// 支持的事件类型
 	eventSecretsModified = "secrets.modified"
 	eventTest            = "test"
@@ -38,6 +38,12 @@ type webhookPayload struct {
 	Event   string `json:"event"`
 	Project struct {
 		SecretPath string `json:"secretPath"`
+		// 以下字段目前未使用，但保留方便将来扩展
+		ProjectID    string `json:"projectId"`
+		ProjectName  string `json:"projectName"`
+		Environment  string `json:"environment"`
+		SecretName   string `json:"secretName"`
+		ReminderNote string `json:"reminderNote"`
 	} `json:"project"`
 	Timestamp int64 `json:"timestamp"`
 }
