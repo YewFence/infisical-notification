@@ -42,6 +42,7 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 		// 标准 RESTful 接口
 		api.GET("", todoHandler.List)                 // 获取列表
 		api.POST("", todoHandler.Create)              // 创建
+		api.GET("/:id", todoHandler.Get)              // 获取单个待办事项
 		api.PATCH("/:id", todoHandler.ToggleComplete) // 切换完成状态
 		api.DELETE("/:id", todoHandler.Delete)        // 删除
 	}

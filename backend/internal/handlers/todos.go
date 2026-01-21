@@ -98,6 +98,41 @@ func (h *TodoHandler) Create(c *gin.Context) {
 	respondOK(c, toTodoResponse(item))
 }
 
+// Get 获取单个待办事项。
+//
+//	@Summary		获取单个待办事项
+//	@Description	根据 ID 获取单个待办事项的详细信息
+//	@Tags			todos
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		int						true	"待办事项 ID"
+//	@Success		200		{object}	map[string]interface{}	"成功返回待办事项"
+//	@Failure		400		{object}	map[string]string		"请求参数错误"
+//	@Failure		404		{object}	map[string]string		"待办事项不存在"
+//	@Failure		500		{object}	map[string]string		"服务器内部错误"
+//	@Router			/{id} [get]
+func (h *TodoHandler) Get(c *gin.Context) {
+	// 未找到 ID 则返回 400 错误
+	id, ok := parseID(c)
+	if !ok {
+		return
+	}
+
+	item, err := h.repo.GetByID(id)
+	if err != nil {
+		// 处理未找到的情况
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			respondError(c, http.StatusNotFound, "todo not found")
+			return
+		}
+		// 其他错误
+		respondError(c, http.StatusInternalServerError, "get todo failed")
+		return
+	}
+
+	respondOK(c, toTodoResponse(item))
+}
+
 // ToggleComplete 切换待办事项的完成状态。
 //
 //	@Summary		切换待办事项完成状态
@@ -113,6 +148,7 @@ func (h *TodoHandler) Create(c *gin.Context) {
 //	@Router			/{id} [patch]
 func (h *TodoHandler) ToggleComplete(c *gin.Context) {
 	// 从 URL 参数获取 ID
+	// 未找到 ID 则返回 400 错误
 	id, ok := parseID(c)
 	if !ok {
 		return

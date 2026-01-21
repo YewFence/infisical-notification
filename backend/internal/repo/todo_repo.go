@@ -50,6 +50,15 @@ func (r *TodoRepository) Create(secretPath string, now time.Time) (models.TodoIt
 	return item, nil
 }
 
+func (r *TodoRepository) GetByID(id uint) (models.TodoItem, error) {
+	var item models.TodoItem
+	// First 方法查找第一条匹配记录，如果没找到会返回 gorm.ErrRecordNotFound。
+	if err := r.db.First(&item, id).Error; err != nil {
+		return models.TodoItem{}, err
+	}
+	return item, nil
+}
+
 // ToggleComplete 切换待办事项的完成状态。
 // 如果当前为未完成，则标记为已完成并设置完成时间；
 // 如果当前为已完成，则重置为未完成并清空完成时间。
