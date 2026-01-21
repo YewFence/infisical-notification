@@ -53,5 +53,11 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 	// 访问 http://localhost:8080/swagger/index.html 查看 API 文档
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// 提供 swagger.yaml 文件的直接访问
+	// 访问 http://localhost:8080/swagger.yaml 获取 OpenAPI 规范文件
+	// 可以将这个 URL 导入到 Postman、Apifox 等工具中
+	engine.StaticFile("/swagger.yaml", "./docs/swagger.yaml")
+	engine.StaticFile("/swagger.json", "./docs/swagger.json")
+
 	return engine
 }
