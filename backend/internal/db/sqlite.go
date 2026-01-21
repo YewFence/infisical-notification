@@ -11,6 +11,7 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	_ "modernc.org/sqlite" // 使用纯 Go 的 SQLite 驱动 (无需 CGO)
 )
 
 // Open 初始化并返回一个 GORM 数据库连接实例。
@@ -32,9 +33,12 @@ func Open(path string) (*gorm.DB, error) {
 
 	// 2. 打开数据库连接
 	// gorm.Open 是 GORM 的入口方法。
-	// sqlite.Open(path) 指定使用 SQLite 驱动。
+	// 使用 sqlite.Dialector 显式指定使用 modernc.org/sqlite 驱动（纯 Go，无需 CGO）。
 	// &gorm.Config{} 可以传递高级配置，这里使用默认配置。
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Dialector{
+		DriverName: "sqlite", // modernc.org/sqlite 注册的驱动名
+		DSN:        path,
+	}, &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
