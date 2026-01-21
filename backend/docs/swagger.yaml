@@ -240,9 +240,13 @@ paths:
     post:
       consumes:
       - application/json
-      description: 接收来自 Infisical 的 Webhook 通知并创建或更新待办事项
+      description: |-
+        接收来自 Infisical 的 Webhook 通知并创建或更新待办事项
+        注意：此接口使用 HMAC-SHA256 签名验证，需要在 X-Infisical-Signature 头中提供正确的签名
+        签名格式：t=<timestamp>,v1=<signature>，其中 signature = HMAC-SHA256(secret, timestamp + "." + requestBody)
+        secret 通过环境变量 INFISICAL_WEBHOOK_SECRET 配置
       parameters:
-      - description: Webhook 签名
+      - description: Webhook 签名（格式：t=timestamp,v1=signature）
         in: header
         name: X-Infisical-Signature
         required: true
@@ -279,18 +283,10 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - WebhookSecret: []
       summary: 接收 Infisical Webhook
       tags:
       - webhook
 schemes:
 - http
 - https
-securityDefinitions:
-  WebhookSecret:
-    description: Infisical Webhook 签名验证
-    in: header
-    name: X-Infisical-Signature
-    type: apiKey
 swagger: "2.0"

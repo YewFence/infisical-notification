@@ -118,12 +118,7 @@ const docTemplate = `{
         },
         "/webhook": {
             "post": {
-                "security": [
-                    {
-                        "WebhookSecret": []
-                    }
-                ],
-                "description": "接收来自 Infisical 的 Webhook 通知并创建或更新待办事项",
+                "description": "接收来自 Infisical 的 Webhook 通知并创建或更新待办事项\n注意：此接口使用 HMAC-SHA256 签名验证，需要在 X-Infisical-Signature 头中提供正确的签名\n签名格式：t=\u003ctimestamp\u003e,v1=\u003csignature\u003e，其中 signature = HMAC-SHA256(secret, timestamp + \".\" + requestBody)\nsecret 通过环境变量 INFISICAL_WEBHOOK_SECRET 配置",
                 "consumes": [
                     "application/json"
                 ],
@@ -137,7 +132,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Webhook 签名",
+                        "description": "Webhook 签名（格式：t=timestamp,v1=signature）",
                         "name": "X-Infisical-Signature",
                         "in": "header",
                         "required": true
@@ -433,14 +428,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "WebhookSecret": {
-            "description": "Infisical Webhook 签名验证",
-            "type": "apiKey",
-            "name": "X-Infisical-Signature",
-            "in": "header"
         }
     }
 }`
