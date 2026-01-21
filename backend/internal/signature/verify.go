@@ -39,8 +39,8 @@ func VerifySignature(bodyText, headerValue, secret string, now time.Time) error 
 	}
 
 	// 3. 计算期望的 HMAC 值
-	// 使用本地 Secret 对请求体进行 HMAC-SHA256 哈希运算。
-	expected := computeHMAC(bodyText, secret)
+	// 使用本地 Secret 对 "timestamp.payload" 进行 HMAC-SHA256 哈希运算。
+	expected := computeHMAC(timestamp, bodyText, secret)
 
 	// 4. 解码请求中的签名
 	// 签名可能是 Hex 或 Base64 编码。
@@ -111,9 +111,12 @@ func isTimestampFresh(timestamp int64, now time.Time) bool {
 }
 
 // computeHMAC 使用 SHA256 计算 HMAC。
-func computeHMAC(payload, secret string) []byte {
+// 按照 Infisical 规范，签名对象是 "<timestamp>.<payload>" 格式的字符串。
+func computeHMAC(timestamp int64, payload, secret string) []byte {
+	// 构造签名字符串: timestamp.payload
+	signedPayload := fmt.Sprintf("%d.%s", timestamp, payload)
 	mac := hmac.New(sha256.New, []byte(secret))
-	_, _ = mac.Write([]byte(payload))
+	_, _ = mac.Write([]byte(signedPayload))
 	return mac.Sum(nil)
 }
 
