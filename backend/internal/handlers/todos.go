@@ -33,7 +33,15 @@ type todoInput struct {
 }
 
 // List 获取所有待办事项列表。
-// GET /api/todos
+//
+//	@Summary		获取待办事项列表
+//	@Description	获取所有待办事项的列表
+//	@Tags			todos
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}	"成功返回待办事项列表"
+//	@Failure		500	{object}	map[string]string		"服务器内部错误"
+//	@Router			/ [get]
 func (h *TodoHandler) List(c *gin.Context) {
 	items, err := h.repo.List()
 	if err != nil {
@@ -50,7 +58,18 @@ func (h *TodoHandler) List(c *gin.Context) {
 }
 
 // Create 创建新的待办事项。
-// POST /api/todos
+//
+//	@Summary		创建待办事项
+//	@Description	创建一个新的待办事项
+//	@Tags			todos
+//	@Accept			json
+//	@Produce		json
+//	@Param			todo	body		todoInput				true	"待办事项信息"
+//	@Success		200		{object}	map[string]interface{}	"成功返回创建的待办事项"
+//	@Failure		400		{object}	map[string]string		"请求参数错误"
+//	@Failure		409		{object}	map[string]string		"密钥路径已存在"
+//	@Failure		500		{object}	map[string]string		"服务器内部错误"
+//	@Router			/ [post]
 func (h *TodoHandler) Create(c *gin.Context) {
 	var input todoInput
 	// ShouldBindJSON 解析请求体中的 JSON 并绑定到 input 结构体。
@@ -80,7 +99,20 @@ func (h *TodoHandler) Create(c *gin.Context) {
 }
 
 // Update 更新待办事项的内容 (SecretPath)。
-// PATCH /api/todos/:id
+//
+//	@Summary		更新待办事项
+//	@Description	更新指定 ID 的待办事项的密钥路径
+//	@Tags			todos
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		int						true	"待办事项 ID"
+//	@Param			todo	body		todoInput				true	"待办事项信息"
+//	@Success		200		{object}	map[string]interface{}	"成功返回更新的待办事项"
+//	@Failure		400		{object}	map[string]string		"请求参数错误"
+//	@Failure		404		{object}	map[string]string		"待办事项不存在"
+//	@Failure		409		{object}	map[string]string		"密钥路径已存在"
+//	@Failure		500		{object}	map[string]string		"服务器内部错误"
+//	@Router			/{id} [patch]
 func (h *TodoHandler) Update(c *gin.Context) {
 	// 从 URL 参数获取 ID
 	id, ok := parseID(c)
@@ -118,7 +150,18 @@ func (h *TodoHandler) Update(c *gin.Context) {
 }
 
 // Delete 删除待办事项。
-// DELETE /api/todos/:id
+//
+//	@Summary		删除待办事项
+//	@Description	删除指定 ID 的待办事项
+//	@Tags			todos
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int					true	"待办事项 ID"
+//	@Success		200	{object}	map[string]bool		"成功删除"
+//	@Failure		400	{object}	map[string]string	"请求参数错误"
+//	@Failure		404	{object}	map[string]string	"待办事项不存在"
+//	@Failure		500	{object}	map[string]string	"服务器内部错误"
+//	@Router			/{id} [delete]
 func (h *TodoHandler) Delete(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
@@ -138,7 +181,18 @@ func (h *TodoHandler) Delete(c *gin.Context) {
 }
 
 // Complete 将待办事项标记为完成。
-// POST /api/todos/:id/complete
+//
+//	@Summary		标记待办事项完成
+//	@Description	将指定 ID 的待办事项标记为已完成
+//	@Tags			todos
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int						true	"待办事项 ID"
+//	@Success		200	{object}	map[string]interface{}	"成功返回已完成的待办事项"
+//	@Failure		400	{object}	map[string]string		"请求参数错误"
+//	@Failure		404	{object}	map[string]string		"待办事项不存在"
+//	@Failure		500	{object}	map[string]string		"服务器内部错误"
+//	@Router			/{id}/complete [post]
 func (h *TodoHandler) Complete(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {

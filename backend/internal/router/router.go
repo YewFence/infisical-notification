@@ -7,7 +7,11 @@ import (
 	"backend/internal/handlers"
 	"backend/internal/repo"
 
+	_ "backend/docs" // 导入生成的 Swagger 文档
+
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // NewRouter 构造并配置 Gin 引擎。
@@ -44,6 +48,10 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 		// 自定义动作接口
 		api.POST("/:id/complete", todoHandler.Complete) // 标记完成
 	}
+
+	// 注册 Swagger UI 路由
+	// 访问 http://localhost:8080/swagger/index.html 查看 API 文档
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return engine
 }
