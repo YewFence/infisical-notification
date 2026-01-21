@@ -211,7 +211,7 @@
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
-                                "type": "boolean"
+                                "type": "string"
                             }
                         }
                     },
@@ -245,7 +245,7 @@
                 }
             },
             "patch": {
-                "description": "更新指定 ID 的待办事项的密钥路径",
+                "description": "切换指定 ID 的待办事项的完成状态（已完成↔未完成）",
                 "consumes": [
                     "application/json"
                 ],
@@ -255,85 +255,7 @@
                 "tags": [
                     "todos"
                 ],
-                "summary": "更新待办事项",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "待办事项 ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "待办事项信息",
-                        "name": "todo",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.todoInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功返回更新的待办事项",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "待办事项不存在",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "密钥路径已存在",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/{id}/complete": {
-            "post": {
-                "description": "将指定 ID 的待办事项标记为已完成",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "todos"
-                ],
-                "summary": "标记待办事项完成",
+                "summary": "切换待办事项完成状态",
                 "parameters": [
                     {
                         "type": "integer",
@@ -345,7 +267,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功返回已完成的待办事项",
+                        "description": "成功返回切换后的待办事项",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true

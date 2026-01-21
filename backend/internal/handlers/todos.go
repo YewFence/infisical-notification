@@ -26,7 +26,7 @@ func NewTodoHandler(repo *repo.TodoRepository) *TodoHandler {
 	return &TodoHandler{repo: repo}
 }
 
-// todoInput 定义了创建/更新接口的请求体结构。
+// todoInput 定义了创建接口的请求体结构。
 type todoInput struct {
 	// 反射标签指定了 JSON 字段名。
 	SecretPath string `json:"secretPath"`
@@ -98,51 +98,33 @@ func (h *TodoHandler) Create(c *gin.Context) {
 	respondOK(c, toTodoResponse(item))
 }
 
-// Update 更新待办事项的内容 (SecretPath)。
+// ToggleComplete 切换待办事项的完成状态。
 //
-//	@Summary		更新待办事项
-//	@Description	更新指定 ID 的待办事项的密钥路径
+//	@Summary		切换待办事项完成状态
+//	@Description	切换指定 ID 的待办事项的完成状态（已完成↔未完成）
 //	@Tags			todos
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		int						true	"待办事项 ID"
-//	@Param			todo	body		todoInput				true	"待办事项信息"
-//	@Success		200		{object}	map[string]interface{}	"成功返回更新的待办事项"
+//	@Success		200		{object}	map[string]interface{}	"成功返回切换后的待办事项"
 //	@Failure		400		{object}	map[string]string		"请求参数错误"
 //	@Failure		404		{object}	map[string]string		"待办事项不存在"
-//	@Failure		409		{object}	map[string]string		"密钥路径已存在"
 //	@Failure		500		{object}	map[string]string		"服务器内部错误"
 //	@Router			/{id} [patch]
-func (h *TodoHandler) Update(c *gin.Context) {
+func (h *TodoHandler) ToggleComplete(c *gin.Context) {
 	// 从 URL 参数获取 ID
 	id, ok := parseID(c)
 	if !ok {
 		return
 	}
 
-	var input todoInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		respondError(c, http.StatusBadRequest, "invalid request body")
-		return
-	}
-
-	secretPath := strings.TrimSpace(input.SecretPath)
-	if secretPath == "" {
-		respondError(c, http.StatusBadRequest, "secretPath is required")
-		return
-	}
-
-	item, err := h.repo.UpdateSecretPath(id, secretPath)
+	item, err := h.repo.ToggleComplete(id, time.Now().UTC())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			respondError(c, http.StatusNotFound, "todo not found")
 			return
 		}
-		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			respondError(c, http.StatusConflict, "secretPath already exists")
-			return
-		}
-		respondError(c, http.StatusInternalServerError, "update todo failed")
+		respondError(c, http.StatusInternalServerError, "toggle complete failed")
 		return
 	}
 
@@ -178,38 +160,6 @@ func (h *TodoHandler) Delete(c *gin.Context) {
 	}
 
 	respondOK(c, "ok")
-}
-
-// Complete 将待办事项标记为完成。
-//
-//	@Summary		标记待办事项完成
-//	@Description	将指定 ID 的待办事项标记为已完成
-//	@Tags			todos
-//	@Accept			json
-//	@Produce		json
-//	@Param			id	path		int						true	"待办事项 ID"
-//	@Success		200	{object}	map[string]interface{}	"成功返回已完成的待办事项"
-//	@Failure		400	{object}	map[string]string		"请求参数错误"
-//	@Failure		404	{object}	map[string]string		"待办事项不存在"
-//	@Failure		500	{object}	map[string]string		"服务器内部错误"
-//	@Router			/{id}/complete [post]
-func (h *TodoHandler) Complete(c *gin.Context) {
-	id, ok := parseID(c)
-	if !ok {
-		return
-	}
-
-	item, err := h.repo.Complete(id, time.Now().UTC())
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			respondError(c, http.StatusNotFound, "todo not found")
-			return
-		}
-		respondError(c, http.StatusInternalServerError, "complete todo failed")
-		return
-	}
-
-	respondOK(c, toTodoResponse(item))
 }
 
 // parseID 辅助函数：从 URL 路径参数中解析 uint 类型的 ID。

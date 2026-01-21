@@ -35,18 +35,15 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 	api := engine.Group("/api/todos")
 	{
 		// 注册具体的路由规则：
-		
+
 		// Webhook 接口，用于接收外部系统 (Infisical) 的通知
 		api.POST("/webhook", webhookHandler.Handle)
 
 		// 标准 RESTful 接口
-		api.GET("", todoHandler.List)          // 获取列表
-		api.POST("", todoHandler.Create)         // 创建
-		api.PATCH("/:id", todoHandler.Update)    // 更新 (局部更新)
-		api.DELETE("/:id", todoHandler.Delete)   // 删除
-		
-		// 自定义动作接口
-		api.POST("/:id/complete", todoHandler.Complete) // 标记完成
+		api.GET("", todoHandler.List)                 // 获取列表
+		api.POST("", todoHandler.Create)              // 创建
+		api.PATCH("/:id", todoHandler.ToggleComplete) // 切换完成状态
+		api.DELETE("/:id", todoHandler.Delete)        // 删除
 	}
 
 	// 注册 Swagger UI 路由

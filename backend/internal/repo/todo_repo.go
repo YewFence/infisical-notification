@@ -50,24 +50,39 @@ func (r *TodoRepository) Create(secretPath string, now time.Time) (models.TodoIt
 	return item, nil
 }
 
-// UpdateSecretPath 更新指定 ID 的待办事项的 SecretPath。
-func (r *TodoRepository) UpdateSecretPath(id uint, secretPath string) (models.TodoItem, error) {
+// ToggleComplete 切换待办事项的完成状态。
+// 如果当前为未完成，则标记为已完成并设置完成时间；
+// 如果当前为已完成，则重置为未完成并清空完成时间。
+func (r *TodoRepository) ToggleComplete(id uint, now time.Time) (models.TodoItem, error) {
 	var item models.TodoItem
 	// First 方法查找第一条匹配记录，如果没找到会返回 gorm.ErrRecordNotFound。
 	if err := r.db.First(&item, id).Error; err != nil {
 		return models.TodoItem{}, err
 	}
 
-	// Model(&item).Updates(...) 生成 UPDATE 语句。
-	// 使用 map[string]interface{} 可以灵活指定要更新的字段。
-	if err := r.db.Model(&item).Updates(map[string]interface{}{
-		"secret_path": secretPath,
-	}).Error; err != nil {
-		return models.TodoItem{}, err
+	// 根据当前状态决定切换方向
+	if item.IsCompleted {
+		// 当前已完成 → 切换为未完成
+		if err := r.db.Model(&item).Updates(map[string]interface{}{
+			"is_completed": false,
+			"completed_at": nil, // 清空完成时间
+		}).Error; err != nil {
+			return models.TodoItem{}, err
+		}
+		item.IsCompleted = false
+		item.CompletedAt = nil
+	} else {
+		// 当前未完成 → 切换为已完成
+		if err := r.db.Model(&item).Updates(map[string]interface{}{
+			"is_completed": true,
+			"completed_at": &now, // 设置完成时间
+		}).Error; err != nil {
+			return models.TodoItem{}, err
+		}
+		item.IsCompleted = true
+		item.CompletedAt = &now
 	}
-	
-	// 更新内存中的对象，以便返回最新状态
-	item.SecretPath = secretPath
+
 	return item, nil
 }
 
@@ -86,33 +101,13 @@ func (r *TodoRepository) Delete(id uint) error {
 	return nil
 }
 
-// Complete 将待办事项标记为完成。
-func (r *TodoRepository) Complete(id uint, now time.Time) (models.TodoItem, error) {
-	var item models.TodoItem
-	if err := r.db.First(&item, id).Error; err != nil {
-		return models.TodoItem{}, err
-	}
-
-	// 更新 is_completed 和 completed_at 字段。
-	if err := r.db.Model(&item).Updates(map[string]interface{}{
-		"is_completed": true,
-		"completed_at": &now,
-	}).Error; err != nil {
-		return models.TodoItem{}, err
-	}
-
-	item.IsCompleted = true
-	item.CompletedAt = &now
-	return item, nil
-}
-
 // UpsertFromWebhook 处理 Webhook 事件：如果记录存在则重置状态，如果不存在则创建。
 // Upsert = Update + Insert
 func (r *TodoRepository) UpsertFromWebhook(secretPath string, now time.Time) (models.TodoItem, error) {
 	var item models.TodoItem
 	// 尝试根据 secret_path 查找记录
 	err := r.db.Where("secret_path = ?", secretPath).First(&item).Error
-	
+
 	if err == nil {
 		// 1. 记录存在：重置为 "未完成" 状态。
 		// 这意味着 Infisical 端发生了变更，需要重新处理这个 Todo。
