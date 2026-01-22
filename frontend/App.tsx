@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { TaskTable } from './components/TaskTable';
+import { CreateTaskModal } from './components/CreateTaskModal';
 import { Task } from './types';
 import { todoService } from './services/todoService';
 import { ApiException } from './services/api';
@@ -17,6 +18,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // const [filterPriority, setFilterPriority] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,17 +96,13 @@ function App() {
     }
   };
 
-  const addTasks = async (newTasks: Partial<Task>[]) => {
-    for (const taskPartial of newTasks) {
-      const secretPath = taskPartial.title || '/new/secret/path';
-
-      try {
-        const created = await todoService.create(secretPath);
-        setTasks(prev => [...prev, created]);
-      } catch (err) {
-        if (err instanceof ApiException) {
-          alert(`创建失败: ${err.message}`);
-        }
+  const addTask = async (secretPath: string) => {
+    try {
+      const created = await todoService.create(secretPath);
+      setTasks(prev => [...prev, created]);
+    } catch (err) {
+      if (err instanceof ApiException) {
+        alert(`创建失败: ${err.message}`);
       }
     }
   };
@@ -194,12 +192,12 @@ function App() {
 
           <div className="flex items-center gap-2 w-full md:w-auto">
             <button
-              onClick={() => addTasks([{ title: '/new/secret/path' }])}
+              onClick={() => setIsModalOpen(true)}
               className="flex-1 md:flex-none flex items-center justify-between gap-3 px-3 py-2 bg-surfaceHighlight border border-border hover:border-textMuted rounded text-textMain text-sm font-medium transition-colors group min-w-[130px]"
             >
               <div className="flex items-center gap-2">
                 <Plus className="w-4 h-4" />
-                Add Secret
+                Add Task
               </div>
               <ChevronDown className="w-3 h-3 text-textMuted group-hover:text-textMain" />
             </button>
@@ -215,6 +213,13 @@ function App() {
           onDelete={deleteTask}
         />
       </div>
+
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={addTask}
+      />
     </Layout>
   );
 }
