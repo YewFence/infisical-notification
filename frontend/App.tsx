@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { TaskTable } from './components/TaskTable';
 import { CreateTaskModal } from './components/CreateTaskModal';
 import { Task } from './types';
 import { todoService } from './services/todoService';
 import { ApiException } from './services/api';
+import { usePolling } from './hooks/usePolling';
 import {
   Box,
   Search,
@@ -13,6 +14,10 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+// 从环境变量读取轮询间隔，默认 30 秒
+const POLL_INTERVAL_SECONDS = parseInt(import.meta.env.VITE_POLL_INTERVAL_SECONDS || '30', 10);
+const POLL_INTERVAL_MS = POLL_INTERVAL_SECONDS * 1000;
+
 function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +25,36 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   // const [filterPriority, setFilterPriority] = useState<string | null>(null);
+
+  // 用于追踪是否有用户操作正在进行
+  const isUserActionRef = useRef(false);
+
+  // 静默加载任务（用于轮询，不显示 loading 状态）
+  const silentLoadTasks = useCallback(async () => {
+    // 如果用户正在操作，跳过本次轮询
+    if (isUserActionRef.current) {
+      return;
+    }
+
+    try {
+      const fetchedTasks = await todoService.getAll();
+      setTasks(fetchedTasks);
+      // 轮询成功时清除之前的错误状态
+      setError(null);
+    } catch (err) {
+      // 轮询失败时静默处理，不更新错误状态
+      console.warn('[Polling] 获取任务列表失败:', err);
+    }
+  }, []);
+
+  // 使用轮询 Hook
+  const { pause: pausePolling, resume: resumePolling } = usePolling(
+    silentLoadTasks,
+    {
+      interval: POLL_INTERVAL_MS,
+      enabled: !loading && !error, // 初始加载完成且无错误时才启用轮询
+    }
+  );
 
   useEffect(() => {
     loadTasks();
@@ -45,6 +80,10 @@ function App() {
   const toggleStatus = async (id: string) => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
+
+    // 暂停轮询
+    isUserActionRef.current = true;
+    pausePolling();
 
     // 简化状态切换: todo ↔ done
     const nextStatus = task.status === 'todo' ? 'done' : 'todo';
@@ -75,12 +114,20 @@ function App() {
       if (err instanceof ApiException) {
         alert(`操作失败: ${err.message}`);
       }
+    } finally {
+      // 恢复轮询
+      isUserActionRef.current = false;
+      resumePolling();
     }
   };
 
   const deleteTask = async (id: string) => {
     const taskToDelete = tasks.find(t => t.id === id);
     if (!taskToDelete) return;
+
+    // 暂停轮询
+    isUserActionRef.current = true;
+    pausePolling();
 
     // 乐观删除
     setTasks(prev => prev.filter(t => t.id !== id));
@@ -93,10 +140,18 @@ function App() {
       if (err instanceof ApiException) {
         alert(`删除失败: ${err.message}`);
       }
+    } finally {
+      // 恢复轮询
+      isUserActionRef.current = false;
+      resumePolling();
     }
   };
 
   const addTask = async (secretPath: string) => {
+    // 暂停轮询
+    isUserActionRef.current = true;
+    pausePolling();
+
     try {
       const created = await todoService.create(secretPath);
       setTasks(prev => [...prev, created]);
@@ -104,6 +159,10 @@ function App() {
       if (err instanceof ApiException) {
         alert(`创建失败: ${err.message}`);
       }
+    } finally {
+      // 恢复轮询
+      isUserActionRef.current = false;
+      resumePolling();
     }
   };
 
