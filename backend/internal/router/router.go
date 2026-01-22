@@ -25,6 +25,16 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 	// 相比 gin.Default()，这给了我们更多的定制空间。
 	engine := gin.New()
 
+	// 配置可信任的代理
+	// 开发环境：不经过代理，设置为 nil
+	// 生产环境：在 Docker 中运行，信任 Docker 网络的代理
+	if cfg.IsDevelopment() {
+		engine.SetTrustedProxies(nil)
+	} else {
+		// Docker 默认网络范围，也可以根据实际情况调整
+		engine.SetTrustedProxies([]string{"172.16.0.0/12", "192.168.0.0/16"})
+	}
+
 	// 注册全局中间件：
 	// gin.Logger(): 将请求日志输出到控制台。
 	// gin.Recovery(): 捕获任何 panic，防止程序崩溃，并返回 500 错误。

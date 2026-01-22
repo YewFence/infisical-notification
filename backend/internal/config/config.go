@@ -20,6 +20,11 @@ const (
 // Config 结构体定义了所有可配置的参数。
 // 使用结构体可以将分散的环境变量聚合在一起，方便在程序中传递。
 type Config struct {
+	// Environment 指定运行环境。
+	// 支持的值：development/dev（开发环境）、production/prod（生产环境）。
+	// 默认为 development。
+	Environment string
+
 	// WebhookSecret 用于验证 Infisical 发来的 Webhook 请求的签名。
 	// 这是一个敏感信息，必须通过环境变量注入。
 	WebhookSecret string
@@ -34,15 +39,23 @@ type Config struct {
 	MaxBodySize int64
 
 	// CORSAllowedOrigins 指定允许的跨域来源列表。
-	// 为空时启用开发模式，允许 localhost 和 127.0.0.1 的所有端口。
-	// 生产环境应设置具体的域名，多个域名用逗号分隔。
+	// 开发环境：为空时允许 localhost 和 127.0.0.1 的所有端口。
+	// 生产环境：应设置具体的域名，多个域名用逗号分隔。
 	CORSAllowedOrigins []string
 }
 
 // IsDevelopment 判断是否为开发模式。
-// 当 CORSAllowedOrigins 为空时，认为是开发环境。
+// 支持 development/dev 或空值（默认为开发环境）。
 func (c *Config) IsDevelopment() bool {
-	return len(c.CORSAllowedOrigins) == 0
+	env := strings.ToLower(c.Environment)
+	return env == "" || env == "development" || env == "dev"
+}
+
+// IsProduction 判断是否为生产模式。
+// 支持 production/prod。
+func (c *Config) IsProduction() bool {
+	env := strings.ToLower(c.Environment)
+	return env == "production" || env == "prod"
 }
 
 // Load 从环境变量加载配置，并应用默认值。
@@ -51,6 +64,7 @@ func Load() (Config, error) {
 	// 初始化配置对象，直接从 os.Getenv 读取环境变量。
 	// strings.TrimSpace 用于去除可能存在的首尾空格，防止配置错误。
 	cfg := Config{
+		Environment:   strings.TrimSpace(os.Getenv("APP_ENV")),
 		WebhookSecret: strings.TrimSpace(os.Getenv("INFISICAL_WEBHOOK_SECRET")),
 		DBPath:        strings.TrimSpace(os.Getenv("TODO_DB_PATH")),
 		BindAddr:      strings.TrimSpace(os.Getenv("TODO_BIND_ADDR")),
@@ -58,6 +72,11 @@ func Load() (Config, error) {
 
 	// 设置默认值逻辑
 	// 如果环境变量未设置（空字符串），则使用预定义的默认值。
+
+	// 环境变量未设置时输出警告
+	if cfg.Environment == "" {
+		println("警告: APP_ENV 环境变量未设置，默认使用开发环境 (development)")
+	}
 
 	if cfg.DBPath == "" {
 		cfg.DBPath = defaultDBPath()
