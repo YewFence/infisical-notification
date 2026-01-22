@@ -29,7 +29,7 @@ const PriorityBadge = ({ priority }: { priority: Task['priority'] }) => {
 
 const StatusIcon = ({ status }: { status: Task['status'] }) => {
   if (status === 'done') return <Check className="w-4 h-4 text-accent" />;
-  if (status === 'in-progress') return <div className="w-3 h-3 rounded-full border-2 border-yellow-500 border-t-transparent animate-spin" />;
+  // if (status === 'in-progress') return <div className="w-3 h-3 rounded-full border-2 border-yellow-500 border-t-transparent animate-spin" />;
   return <div className="w-3 h-3 rounded-full border border-textMuted" />;
 };
 
@@ -108,7 +108,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggleStatus, onD
                   <div
                     className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium border
                       ${task.status === 'done' ? 'bg-accent/5 text-accent border-accent/20' :
-                        task.status === 'in-progress' ? 'bg-blue-500/5 text-blue-400 border-blue-500/20' :
+                        // task.status === 'in-progress' ? 'bg-blue-500/5 text-blue-400 border-blue-500/20' :
                         'bg-white/5 text-textMuted border-white/10'}`}
                   >
                     <StatusIcon status={task.status} />

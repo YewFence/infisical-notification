@@ -17,7 +17,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterPriority, setFilterPriority] = useState<string | null>(null);
+  // const [filterPriority, setFilterPriority] = useState<string | null>(null);
 
   useEffect(() => {
     loadTasks();
@@ -44,20 +44,28 @@ function App() {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
-    // 前端乐观更新
-    const nextStatus = task.status === 'todo' ? 'in-progress' :
-                       task.status === 'in-progress' ? 'done' : 'todo';
+    // 简化状态切换: todo ↔ done
+    const nextStatus = task.status === 'todo' ? 'done' : 'todo';
 
+    // 原逻辑（包含 in-progress）:
+    // const nextStatus = task.status === 'todo' ? 'in-progress' :
+    //                    task.status === 'in-progress' ? 'done' : 'todo';
+
+    // 前端乐观更新
     setTasks(prev => prev.map(t =>
       t.id === id ? { ...t, status: nextStatus } : t
     ));
 
     try {
-      // 仅当切换到 'done' 或从 'done' 切换时才调用后端
-      if (nextStatus === 'done' || task.status === 'done') {
-        const updated = await todoService.toggleComplete(id);
-        setTasks(prev => prev.map(t => t.id === id ? updated : t));
-      }
+      // 直接调用后端切换完成状态
+      const updated = await todoService.toggleComplete(id);
+      setTasks(prev => prev.map(t => t.id === id ? updated : t));
+
+      // 原逻辑（仅在 done 状态时调用后端）:
+      // if (nextStatus === 'done' || task.status === 'done') {
+      //   const updated = await todoService.toggleComplete(id);
+      //   setTasks(prev => prev.map(t => t.id === id ? updated : t));
+      // }
       // 'in-progress' 状态仅在前端维护
     } catch (err) {
       // 回滚
@@ -103,8 +111,8 @@ function App() {
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesPriority = filterPriority ? task.priority === filterPriority : true;
-    return matchesSearch && matchesPriority;
+    // const matchesPriority = filterPriority ? task.priority === filterPriority : true;
+    return matchesSearch; // && matchesPriority;
   });
 
   if (loading) {
@@ -164,13 +172,13 @@ function App() {
         <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
 
           <div className="flex items-center gap-2 w-full md:w-auto">
-             <button
+             {/* <button
                 onClick={() => setFilterPriority(prev => prev ? null : 'high')}
                 className={`flex items-center gap-2 px-3 py-2 rounded bg-surfaceHighlight border ${filterPriority ? 'border-accent text-accent' : 'border-border text-textMuted hover:text-textMain'} transition-colors text-sm font-medium whitespace-nowrap`}
              >
                <Filter className="w-4 h-4" />
                Filters
-             </button>
+             </button> */}
           </div>
 
           <div className="relative group w-full md:w-64">

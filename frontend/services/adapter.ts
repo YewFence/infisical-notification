@@ -8,9 +8,7 @@ export function todoItemToTask(dto: TodoItemDTO): Task {
     id: dto.id.toString(),
     title: dto.secretPath,
     status: dto.isCompleted ? 'done' : 'todo',
-    priority: 'medium',
-    tags: [],
-    isFolder: false,
+    // priority: 'medium',
     createdAt: formatDate(dto.createdAt),
     completedAt: dto.completedAt ? formatDate(dto.completedAt) : undefined,
   };
