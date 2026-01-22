@@ -78,29 +78,71 @@ go mod download
 
 ### 配置环境变量
 
-创建 `.env` 文件或直接设置环境变量（可选，程序有默认值）：
+项目提供了 `.env.example` 文件作为配置模板，包含所有可用的环境变量及其说明。
 
+#### 快速开始
+
+1. 复制示例配置文件：
 ```bash
-# Webhook 签名验证密钥（必需，如果要使用 Webhook 功能）
-INFISICAL_WEBHOOK_SECRET=your_secret_key_here
-
-# 数据库文件路径（可选，默认：backend/data/todos.db）
-TODO_DB_PATH=./data/todos.db
-
-# HTTP 服务监听地址（可选，默认：:8080）
-TODO_BIND_ADDR=:8080
+cp .env.example .env
 ```
 
-**PowerShell 设置环境变量示例**:
+2. 编辑 `.env` 文件，根据需要修改配置项（所有配置都有默认值，可选配置）
+
+#### 环境变量说明
+
+| 环境变量 | 说明 | 默认值 | 是否必需 |
+|---------|------|--------|---------|
+| `APP_ENV` | 运行环境（development/dev 或 production/prod） | `development` | 否 |
+| `INFISICAL_WEBHOOK_SECRET` | Infisical Webhook 签名验证密钥 | 无 | 使用 Webhook 时必需 |
+| `TODO_DB_PATH` | SQLite 数据库文件路径 | `backend/data/todos.db` 或 `data/todos.db` | 否 |
+| `TODO_BIND_ADDR` | HTTP 服务监听地址 | `:8080` | 否 |
+| `TODO_MAX_BODY_SIZE` | 请求体最大大小（字节） | `10485760`（10MB） | 否 |
+| `CORS_ALLOWED_ORIGINS` | 允许的跨域来源，多个用逗号分隔 | 开发环境自动允许 localhost | 否 |
+
+#### 环境变量设置方式
+
+**方式一：使用 .env 文件（推荐）**
+
+编辑 `.env` 文件：
+```bash
+APP_ENV=development
+INFISICAL_WEBHOOK_SECRET=your_secret_key_here
+TODO_BIND_ADDR=:8080
+TODO_MAX_BODY_SIZE=10485760
+CORS_ALLOWED_ORIGINS=https://example.com,https://app.example.com
+```
+
+**方式二：PowerShell 临时设置**
 ```powershell
+$env:APP_ENV="development"
 $env:INFISICAL_WEBHOOK_SECRET="your_secret_key_here"
 $env:TODO_BIND_ADDR=":8080"
+$env:TODO_MAX_BODY_SIZE="10485760"
+$env:CORS_ALLOWED_ORIGINS="https://example.com,https://app.example.com"
 ```
 
-**Bash 设置环境变量示例**:
+**方式三：Bash 临时设置**
 ```bash
+export APP_ENV=development
 export INFISICAL_WEBHOOK_SECRET="your_secret_key_here"
 export TODO_BIND_ADDR=":8080"
+export TODO_MAX_BODY_SIZE=10485760
+export CORS_ALLOWED_ORIGINS="https://example.com,https://app.example.com"
+```
+
+#### 开发环境 vs 生产环境
+
+**开发环境特性**：
+- CORS 自动允许 localhost 和 127.0.0.1 的所有端口
+- 更详细的日志输出
+- 自动信任代理（用于获取真实 IP）
+
+**生产环境配置建议**：
+```bash
+APP_ENV=production
+CORS_ALLOWED_ORIGINS=https://yourdomain.com
+TODO_MAX_BODY_SIZE=5242880  # 5MB，根据实际需求调整
 ```
 
 ### 运行服务
