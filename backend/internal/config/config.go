@@ -3,6 +3,7 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -75,7 +76,7 @@ func Load() (Config, error) {
 
 	// 环境变量未设置时输出警告
 	if cfg.Environment == "" {
-		println("警告: APP_ENV 环境变量未设置，默认使用开发环境 (development)")
+		slog.Warn("APP_ENV 环境变量未设置，默认使用开发环境 (development)")
 	}
 
 	if cfg.DBPath == "" {

@@ -20,6 +20,8 @@ package main
 
 import (
 	"log"
+	"log/slog"
+	"strings"
 
 	"github.com/joho/godotenv"
 
@@ -46,6 +48,16 @@ func main() {
 		// log.Fatal 会打印错误日志并以非零状态码退出程序 (os.Exit(1))。
 		log.Fatal(err)
 	}
+
+	// 打印启动配置信息，便于排查问题
+	corsDisplay := "(未配置，开发模式允许 localhost)"
+	if len(cfg.CORSAllowedOrigins) > 0 {
+		corsDisplay = strings.Join(cfg.CORSAllowedOrigins, ", ")
+	}
+	slog.Info("服务配置已加载:")
+	slog.Info("- 环境模式: ", cfg.Environment)
+	slog.Info("- 监听地址: ", cfg.BindAddr)
+	slog.Info("- CORS域名: ", corsDisplay)
 
 	// 2. 初始化数据库连接
 	// 使用 GORM 连接 SQLite 数据库。
