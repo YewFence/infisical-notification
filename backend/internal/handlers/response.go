@@ -3,6 +3,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -56,4 +57,14 @@ func respondOK(c *gin.Context, data interface{}) {
 // 这让前端可以统一处理错误逻辑。
 func respondError(c *gin.Context, status int, message string) {
 	c.JSON(status, gin.H{"error": message})
+}
+
+// respondUnauthorized 统一返回 unauthorized 错误，但在后端日志中记录具体原因。
+// 这样可以避免向客户端泄露敏感的错误信息，同时方便后端调试。
+// actualReason: 实际的错误原因，会记录到日志中
+func respondUnauthorized(c *gin.Context, actualReason string) {
+	// 记录具体的错误原因到后端日志
+	log.Printf("[Unauthorized] Path: %s, Reason: %s", c.Request.URL.Path, actualReason)
+	// 统一返回 unauthorized 给客户端
+	c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 }

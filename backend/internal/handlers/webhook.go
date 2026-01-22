@@ -83,21 +83,21 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 
 	// 2. 检查系统是否配置了 Webhook Secret
 	if strings.TrimSpace(h.secret) == "" {
-		respondError(c, http.StatusInternalServerError, "missing webhook secret")
+		respondUnauthorized(c, "missing webhook secret")
 		return
 	}
 
 	// 3. 获取签名头
 	signatureHeaderValue := strings.TrimSpace(c.GetHeader(signatureHeader))
 	if signatureHeaderValue == "" {
-		respondError(c, http.StatusBadRequest, "missing signature header")
+		respondUnauthorized(c, "missing signature header")
 		return
 	}
 
 	// 4. 验证签名
 	// 调用 signature 包的逻辑，确保请求确实来自 Infisical 且未被篡改。
 	if err := signature.VerifySignature(bodyText, signatureHeaderValue, h.secret, time.Now().UTC()); err != nil {
-		respondError(c, http.StatusUnauthorized, "invalid signature")
+		respondUnauthorized(c, "invalid signature: "+err.Error())
 		return
 	}
 
