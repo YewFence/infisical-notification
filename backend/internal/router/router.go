@@ -7,6 +7,7 @@ import (
 
 	"backend/internal/config"
 	"backend/internal/handlers"
+	"backend/internal/middleware"
 	"backend/internal/repo"
 
 	_ "backend/docs" // 导入生成的 Swagger 文档
@@ -28,6 +29,9 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 	// gin.Logger(): 将请求日志输出到控制台。
 	// gin.Recovery(): 捕获任何 panic，防止程序崩溃，并返回 500 错误。
 	engine.Use(gin.Logger(), gin.Recovery())
+
+	// 添加请求体大小限制中间件
+	engine.Use(middleware.BodySizeLimit(cfg.MaxBodySize))
 
 	// 配置 CORS 中间件，允许前端跨域访问
 	engine.Use(cors.New(cors.Config{

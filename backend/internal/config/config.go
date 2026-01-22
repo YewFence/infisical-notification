@@ -5,13 +5,16 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
 // defaultBindAddr 定义默认的监听地址和端口。
 // ":8080" 表示监听所有网卡的 8080 端口。
+// defaultMaxBodySize 定义默认的请求体大小限制（10MB）。
 const (
-	defaultBindAddr = ":8080"
+	defaultBindAddr     = ":8080"
+	defaultMaxBodySize  = 10 << 20 // 10MB
 )
 
 // Config 结构体定义了所有可配置的参数。
@@ -26,6 +29,9 @@ type Config struct {
 
 	// BindAddr 指定 HTTP 服务监听的地址，例如 ":8080" 或 "127.0.0.1:3000"。
 	BindAddr string
+
+	// MaxBodySize 指定请求体的最大大小（字节）。
+	MaxBodySize int64
 }
 
 // Load 从环境变量加载配置，并应用默认值。
@@ -47,6 +53,18 @@ func Load() (Config, error) {
 	}
 	if cfg.BindAddr == "" {
 		cfg.BindAddr = defaultBindAddr
+	}
+
+	// 加载请求体大小限制配置
+	maxBodySizeStr := strings.TrimSpace(os.Getenv("TODO_MAX_BODY_SIZE"))
+	if maxBodySizeStr != "" {
+		if size, err := strconv.ParseInt(maxBodySizeStr, 10, 64); err == nil && size > 0 {
+			cfg.MaxBodySize = size
+		} else {
+			cfg.MaxBodySize = defaultMaxBodySize
+		}
+	} else {
+		cfg.MaxBodySize = defaultMaxBodySize
 	}
 
 	return cfg, nil
