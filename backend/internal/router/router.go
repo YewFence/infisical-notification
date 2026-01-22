@@ -3,6 +3,8 @@
 package router
 
 import (
+	"strings"
+
 	"backend/internal/config"
 	"backend/internal/handlers"
 	"backend/internal/repo"
@@ -29,7 +31,11 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 
 	// 配置 CORS 中间件，允许前端跨域访问
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // 允许前端开发服务器
+		AllowOriginFunc: func(origin string) bool {
+			// 允许 localhost 和 127.0.0.1 的所有端口
+			return strings.HasPrefix(origin, "http://localhost:") ||
+				strings.HasPrefix(origin, "http://127.0.0.1:")
+		},
 		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
