@@ -32,6 +32,17 @@ type Config struct {
 
 	// MaxBodySize 指定请求体的最大大小（字节）。
 	MaxBodySize int64
+
+	// CORSAllowedOrigins 指定允许的跨域来源列表。
+	// 为空时启用开发模式，允许 localhost 和 127.0.0.1 的所有端口。
+	// 生产环境应设置具体的域名，多个域名用逗号分隔。
+	CORSAllowedOrigins []string
+}
+
+// IsDevelopment 判断是否为开发模式。
+// 当 CORSAllowedOrigins 为空时，认为是开发环境。
+func (c *Config) IsDevelopment() bool {
+	return len(c.CORSAllowedOrigins) == 0
 }
 
 // Load 从环境变量加载配置，并应用默认值。
@@ -65,6 +76,17 @@ func Load() (Config, error) {
 		}
 	} else {
 		cfg.MaxBodySize = defaultMaxBodySize
+	}
+
+	// 加载 CORS 配置
+	corsOrigins := strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS"))
+	if corsOrigins != "" {
+		origins := strings.Split(corsOrigins, ",")
+		for _, origin := range origins {
+			if trimmed := strings.TrimSpace(origin); trimmed != "" {
+				cfg.CORSAllowedOrigins = append(cfg.CORSAllowedOrigins, trimmed)
+			}
+		}
 	}
 
 	return cfg, nil

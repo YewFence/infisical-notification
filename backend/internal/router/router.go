@@ -35,11 +35,7 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 
 	// 配置 CORS 中间件，允许前端跨域访问
 	engine.Use(cors.New(cors.Config{
-		AllowOriginFunc: func(origin string) bool {
-			// 允许 localhost 和 127.0.0.1 的所有端口
-			return strings.HasPrefix(origin, "http://localhost:") ||
-				strings.HasPrefix(origin, "http://127.0.0.1:")
-		},
+		AllowOriginFunc:  buildCORSValidator(cfg),
 		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -78,4 +74,26 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 	engine.StaticFile("/swagger.json", "./docs/swagger.json")
 
 	return engine
+}
+
+// buildCORSValidator 根据配置构建 CORS 来源验证函数。
+// 开发模式：允许 localhost 和 127.0.0.1 的所有端口
+// 生产模式：只允许配置的特定域名
+func buildCORSValidator(cfg config.Config) func(string) bool {
+	if cfg.IsDevelopment() {
+		return func(origin string) bool {
+			return strings.HasPrefix(origin, "http://localhost:") ||
+				strings.HasPrefix(origin, "http://127.0.0.1:")
+		}
+	}
+
+	// 生产模式：构建允许域名的 map，提高查找效率
+	allowedOrigins := make(map[string]bool)
+	for _, origin := range cfg.CORSAllowedOrigins {
+		allowedOrigins[origin] = true
+	}
+
+	return func(origin string) bool {
+		return allowedOrigins[origin]
+	}
 }
