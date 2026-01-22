@@ -9,7 +9,6 @@ import { usePolling } from './hooks/usePolling';
 import {
   Box,
   Search,
-  Filter,
   Plus,
 } from 'lucide-react';
 
