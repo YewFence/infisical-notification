@@ -22,7 +22,6 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [filterPriority, setFilterPriority] = useState<string | null>(null);
 
   // 用于追踪是否有用户操作正在进行
   const isUserActionRef = useRef(false);
@@ -86,10 +85,6 @@ function App() {
     // 简化状态切换: todo ↔ done
     const nextStatus = task.status === 'todo' ? 'done' : 'todo';
 
-    // 原逻辑（包含 in-progress）:
-    // const nextStatus = task.status === 'todo' ? 'in-progress' :
-    //                    task.status === 'in-progress' ? 'done' : 'todo';
-
     // 前端乐观更新
     setTasks(prev => prev.map(t =>
       t.id === id ? { ...t, status: nextStatus } : t
@@ -99,13 +94,6 @@ function App() {
       // 直接调用后端切换完成状态
       const updated = await todoService.toggleComplete(id);
       setTasks(prev => prev.map(t => t.id === id ? updated : t));
-
-      // 原逻辑（仅在 done 状态时调用后端）:
-      // if (nextStatus === 'done' || task.status === 'done') {
-      //   const updated = await todoService.toggleComplete(id);
-      //   setTasks(prev => prev.map(t => t.id === id ? updated : t));
-      // }
-      // 'in-progress' 状态仅在前端维护
     } catch (err) {
       // 回滚
       setTasks(prev => prev.map(t => t.id === id ? task : t));
@@ -165,9 +153,7 @@ function App() {
   };
 
   const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase());
-    // const matchesPriority = filterPriority ? task.priority === filterPriority : true;
-    return matchesSearch; // && matchesPriority;
+    return task.title.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   if (loading) {
@@ -216,17 +202,6 @@ function App() {
 
         {/* Filters & Actions */}
         <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-
-          <div className="flex items-center gap-2 w-full md:w-auto">
-             {/* <button
-                onClick={() => setFilterPriority(prev => prev ? null : 'high')}
-                className={`flex items-center gap-2 px-3 py-2 rounded bg-surfaceHighlight border ${filterPriority ? 'border-accent text-accent' : 'border-border text-textMuted hover:text-textMain'} transition-colors text-sm font-medium whitespace-nowrap`}
-             >
-               <Filter className="w-4 h-4" />
-               Filters
-             </button> */}
-          </div>
-
           <div className="relative group w-full md:w-64">
              <Search className="absolute left-3 top-2.5 w-4 h-4 text-textMuted group-focus-within:text-accent transition-colors" />
              <input

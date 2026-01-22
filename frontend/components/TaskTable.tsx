@@ -4,7 +4,6 @@ import {
   Folder,
   Trash2,
   Check,
-  ArrowRight,
   AlertTriangle
 } from 'lucide-react';
 
@@ -14,22 +13,8 @@ interface TaskTableProps {
   onDelete: (id: string) => void;
 }
 
-// const PriorityBadge = ({ priority }: { priority: Task['priority'] }) => {
-//   const colors = {
-//     low: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-//     medium: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-//     high: 'text-red-400 bg-red-400/10 border-red-400/20',
-//   };
-//   return (
-//     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-semibold tracking-wider border ${colors[priority]}`}>
-//       {priority}
-//     </span>
-//   );
-// };
-
 const StatusIcon = ({ status }: { status: Task['status'] }) => {
   if (status === 'done') return <Check className="w-4 h-4 text-accent" />;
-  // if (status === 'in-progress') return <div className="w-3 h-3 rounded-full border-2 border-yellow-500 border-t-transparent animate-spin" />;
   return <div className="w-3 h-3 rounded-full border border-textMuted" />;
 };
 
@@ -72,7 +57,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggleStatus, onD
               NAME
             </div>
             <div className="col-span-2 text-center cursor-pointer hover:text-textMain">STATUS</div>
-            {/* <div className="col-span-1 text-center cursor-pointer hover:text-textMain">PRIORITY</div> */}
             <div className="col-span-2 text-center cursor-pointer hover:text-textMain">CREATED</div>
             <div className="col-span-2 text-center cursor-pointer hover:text-textMain">COMPLETED</div>
             <div className="col-span-1"></div>
@@ -108,18 +92,12 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggleStatus, onD
                   <div
                     className={`flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium border
                       ${task.status === 'done' ? 'bg-accent/5 text-accent border-accent/20' :
-                        // task.status === 'in-progress' ? 'bg-blue-500/5 text-blue-400 border-blue-500/20' :
                         'bg-white/5 text-textMuted border-white/10'}`}
                   >
                     <StatusIcon status={task.status} />
-                    <span className="capitalize">{task.status.replace('-', ' ')}</span>
+                    <span className="capitalize">{task.status}</span>
                   </div>
                 </div>
-
-                {/* Priority Column - Commented out for future use */}
-                {/* <div className="col-span-1 flex justify-center">
-                  <PriorityBadge priority={task.priority} />
-                </div> */}
 
                 {/* Created Date Column */}
                 <div className="col-span-2 flex justify-center text-textMuted text-xs font-mono">
@@ -138,9 +116,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggleStatus, onD
                     className="p-1.5 rounded hover:bg-white/10 text-textMuted hover:text-red-400 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
-                  </button>
-                  <button className="p-1.5 rounded hover:bg-white/10 text-textMuted hover:text-accent ml-1">
-                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
