@@ -11,7 +11,6 @@ import {
   Search,
   Filter,
   Plus,
-  ChevronDown,
 } from 'lucide-react';
 
 // 从环境变量读取轮询间隔，默认 30 秒
@@ -214,18 +213,9 @@ function App() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-end gap-4 mb-4">
 
-        {/* Left Side: Folder Button */}
-        <div className="flex items-center gap-2">
-            <button className="w-9 h-9 flex items-center justify-center bg-surfaceHighlight border border-border rounded hover:border-accent transition-colors group">
-              <div className="w-4 h-4 text-accent group-hover:scale-110 transition-transform">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
-              </div>
-            </button>
-        </div>
-
-        {/* Right Side: Filters & Actions */}
+        {/* Filters & Actions */}
         <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
 
           <div className="flex items-center gap-2 w-full md:w-auto">
@@ -252,13 +242,10 @@ function App() {
           <div className="flex items-center gap-2 w-full md:w-auto">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex-1 md:flex-none flex items-center justify-between gap-3 px-3 py-2 bg-surfaceHighlight border border-border hover:border-textMuted rounded text-textMain text-sm font-medium transition-colors group min-w-[130px]"
+              className="flex-1 md:flex-none flex items-center gap-2 px-3 py-2 bg-surfaceHighlight border border-border hover:border-textMuted rounded text-textMain text-sm font-medium transition-colors"
             >
-              <div className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Add Task
-              </div>
-              <ChevronDown className="w-3 h-3 text-textMuted group-hover:text-textMain" />
+              <Plus className="w-4 h-4" />
+              Add Task
             </button>
           </div>
         </div>
