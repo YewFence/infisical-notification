@@ -14,18 +14,18 @@ interface TaskTableProps {
   onDelete: (id: string) => void;
 }
 
-const PriorityBadge = ({ priority }: { priority: Task['priority'] }) => {
-  const colors = {
-    low: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-    medium: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-    high: 'text-red-400 bg-red-400/10 border-red-400/20',
-  };
-  return (
-    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-semibold tracking-wider border ${colors[priority]}`}>
-      {priority}
-    </span>
-  );
-};
+// const PriorityBadge = ({ priority }: { priority: Task['priority'] }) => {
+//   const colors = {
+//     low: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+//     medium: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+//     high: 'text-red-400 bg-red-400/10 border-red-400/20',
+//   };
+//   return (
+//     <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-semibold tracking-wider border ${colors[priority]}`}>
+//       {priority}
+//     </span>
+//   );
+// };
 
 const StatusIcon = ({ status }: { status: Task['status'] }) => {
   if (status === 'done') return <Check className="w-4 h-4 text-accent" />;
