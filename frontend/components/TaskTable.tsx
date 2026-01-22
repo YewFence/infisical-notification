@@ -122,22 +122,11 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggleStatus, onD
             ))
           )}
         </div>
-        
-        {/* Pagination Footer */}
-        <div className="px-4 py-3 flex items-center justify-between border-b border-border text-xs text-textMuted">
-          <div className="flex items-center gap-2">
-            <Folder className="w-4 h-4 text-yellow-500" />
-            <span>{tasks.length} {tasks.length === 1 ? 'Item' : 'Items'}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span>1 - {tasks.length} of {tasks.length}</span>
-            <div className="flex gap-2">
-              <button disabled className="p-1 disabled:opacity-30 hover:text-textMain"><span className="text-xs">«</span></button>
-              <button disabled className="p-1 disabled:opacity-30 hover:text-textMain"><span className="text-xs">‹</span></button>
-              <button disabled className="p-1 disabled:opacity-30 hover:text-textMain"><span className="text-xs">›</span></button>
-              <button disabled className="p-1 disabled:opacity-30 hover:text-textMain"><span className="text-xs">»</span></button>
-            </div>
-          </div>
+
+        {/* Footer */}
+        <div className="px-4 py-3 flex items-center border-b border-border text-xs text-textMuted">
+          <Folder className="w-4 h-4 text-yellow-500 mr-2" />
+          <span>{tasks.length} {tasks.length === 1 ? 'Item' : 'Items'}</span>
         </div>
       </div>
 
