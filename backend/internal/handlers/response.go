@@ -52,10 +52,11 @@ func respondOK(c *gin.Context, data interface{}) {
 	respondData(c, http.StatusOK, data)
 }
 
-// respondError 统一封装错误响应。
+// RespondError 统一封装错误响应。
 // 格式：{"error": "message"}
 // 这让前端可以统一处理错误逻辑。
-func respondError(c *gin.Context, status int, message string) {
+// 导出供 handlers 和 middleware 包使用。
+func RespondError(c *gin.Context, status int, message string) {
 	c.JSON(status, gin.H{"error": message})
 }
 

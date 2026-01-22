@@ -45,7 +45,7 @@ type todoInput struct {
 func (h *TodoHandler) List(c *gin.Context) {
 	items, err := h.repo.List()
 	if err != nil {
-		respondError(c, http.StatusInternalServerError, "list todos failed")
+		RespondError(c, http.StatusInternalServerError, "list todos failed")
 		return
 	}
 
@@ -75,23 +75,23 @@ func (h *TodoHandler) Create(c *gin.Context) {
 	// ShouldBindJSON 解析请求体中的 JSON 并绑定到 input 结构体。
 	// 如果 JSON 格式错误或字段类型不匹配，返回 error。
 	if err := c.ShouldBindJSON(&input); err != nil {
-		respondError(c, http.StatusBadRequest, "invalid request body")
+		RespondError(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
 	secretPath := strings.TrimSpace(input.SecretPath)
 	if secretPath == "" {
-		respondError(c, http.StatusBadRequest, "secretPath is required")
+		RespondError(c, http.StatusBadRequest, "secretPath is required")
 		return
 	}
 
 	item, err := h.repo.Create(secretPath, time.Now().UTC())
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			respondError(c, http.StatusConflict, "secretPath already exists")
+			RespondError(c, http.StatusConflict, "secretPath already exists")
 			return
 		}
-		respondError(c, http.StatusInternalServerError, "create todo failed")
+		RespondError(c, http.StatusInternalServerError, "create todo failed")
 		return
 	}
 
@@ -122,11 +122,11 @@ func (h *TodoHandler) Get(c *gin.Context) {
 	if err != nil {
 		// 处理未找到的情况
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			respondError(c, http.StatusNotFound, "todo not found")
+			RespondError(c, http.StatusNotFound, "todo not found")
 			return
 		}
 		// 其他错误
-		respondError(c, http.StatusInternalServerError, "get todo failed")
+		RespondError(c, http.StatusInternalServerError, "get todo failed")
 		return
 	}
 
@@ -157,10 +157,10 @@ func (h *TodoHandler) ToggleComplete(c *gin.Context) {
 	item, err := h.repo.ToggleComplete(id, time.Now().UTC())
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			respondError(c, http.StatusNotFound, "todo not found")
+			RespondError(c, http.StatusNotFound, "todo not found")
 			return
 		}
-		respondError(c, http.StatusInternalServerError, "toggle complete failed")
+		RespondError(c, http.StatusInternalServerError, "toggle complete failed")
 		return
 	}
 
@@ -188,10 +188,10 @@ func (h *TodoHandler) Delete(c *gin.Context) {
 
 	if err := h.repo.Delete(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			respondError(c, http.StatusNotFound, "todo not found")
+			RespondError(c, http.StatusNotFound, "todo not found")
 			return
 		}
-		respondError(c, http.StatusInternalServerError, "delete todo failed")
+		RespondError(c, http.StatusInternalServerError, "delete todo failed")
 		return
 	}
 
@@ -204,7 +204,7 @@ func parseID(c *gin.Context) (uint, bool) {
 	idText := strings.TrimSpace(c.Param("id"))
 	idValue, err := strconv.ParseUint(idText, 10, 64)
 	if err != nil {
-		respondError(c, http.StatusBadRequest, "invalid id")
+		RespondError(c, http.StatusBadRequest, "invalid id")
 		return 0, false
 	}
 	return uint(idValue), true

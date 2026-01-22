@@ -71,13 +71,13 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 	// 任何对 JSON 的微小改动（如空格）都会导致签名验证失败。
 	bodyBytes, err := c.GetRawData()
 	if err != nil {
-		respondError(c, http.StatusBadRequest, "read body failed")
+		RespondError(c, http.StatusBadRequest, "read body failed")
 		return
 	}
 
 	bodyText := strings.TrimSpace(string(bodyBytes))
 	if bodyText == "" {
-		respondError(c, http.StatusBadRequest, "empty body")
+		RespondError(c, http.StatusBadRequest, "empty body")
 		return
 	}
 
@@ -104,7 +104,7 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 	// 5. 解析 JSON 载荷
 	var payload webhookPayload
 	if err := json.Unmarshal(bodyBytes, &payload); err != nil {
-		respondError(c, http.StatusBadRequest, "invalid payload")
+		RespondError(c, http.StatusBadRequest, "invalid payload")
 		return
 	}
 
@@ -130,7 +130,7 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 	// 更新或插入 Todo 项
 	item, err := h.repo.UpsertFromWebhook(secretPath, time.Now().UTC())
 	if err != nil {
-		respondError(c, http.StatusInternalServerError, "upsert todo failed")
+		RespondError(c, http.StatusInternalServerError, "upsert todo failed")
 		return
 	}
 
