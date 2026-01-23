@@ -1,21 +1,38 @@
+import { z } from 'zod';
+import { ApiErrorSchema, createApiResponseSchema } from './types';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/todos';
 
-interface ApiResponse<T> {
-  data: T;
-}
-
-interface ApiError {
-  error: string;
-}
-
 export class ApiException extends Error {
-  constructor(public statusCode: number, message: string) {
+  constructor(
+    public statusCode: number,
+    message: string,
+    public validationErrors?: z.ZodError
+  ) {
     super(message);
     this.name = 'ApiException';
   }
 }
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+export class ValidationException extends ApiException {
+  constructor(zodError: z.ZodError) {
+    const message = formatZodError(zodError);
+    super(0, message, zodError);
+    this.name = 'ValidationException';
+  }
+}
+
+function formatZodError(error: z.ZodError): string {
+  return error.issues
+    .map((e) => `${e.path.join('.')}: ${e.message}`)
+    .join('; ');
+}
+
+async function request<T>(
+  endpoint: string,
+  schema: z.ZodType<T>,
+  options?: RequestInit
+): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
   try {
@@ -30,12 +47,22 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const json = await response.json();
 
     if (!response.ok) {
-      const error = json as ApiError;
-      throw new ApiException(response.status, error.error || 'Unknown error');
+      const errorResult = ApiErrorSchema.safeParse(json);
+      const errorMessage = errorResult.success
+        ? errorResult.data.error
+        : 'Unknown error';
+      throw new ApiException(response.status, errorMessage);
     }
 
-    const result = json as ApiResponse<T>;
-    return result.data;
+    const responseSchema = createApiResponseSchema(schema);
+    const result = responseSchema.safeParse(json);
+
+    if (!result.success) {
+      console.error('API Response validation failed:', result.error);
+      throw new ValidationException(result.error);
+    }
+
+    return result.data.data;
   } catch (error) {
     if (error instanceof ApiException) throw error;
     throw new ApiException(0, error instanceof Error ? error.message : 'Network error');
@@ -43,11 +70,18 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  get: <T>(endpoint: string) => request<T>(endpoint, { method: 'GET' }),
-  post: <T>(endpoint: string, data?: unknown) => request<T>(endpoint, {
-    method: 'POST',
-    body: data ? JSON.stringify(data) : undefined,
-  }),
-  patch: <T>(endpoint: string) => request<T>(endpoint, { method: 'PATCH' }),
-  delete: <T>(endpoint: string) => request<T>(endpoint, { method: 'DELETE' }),
+  get: <T>(endpoint: string, schema: z.ZodType<T>) =>
+    request(endpoint, schema, { method: 'GET' }),
+
+  post: <T>(endpoint: string, schema: z.ZodType<T>, data?: unknown) =>
+    request(endpoint, schema, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    }),
+
+  patch: <T>(endpoint: string, schema: z.ZodType<T>) =>
+    request(endpoint, schema, { method: 'PATCH' }),
+
+  delete: <T>(endpoint: string, schema: z.ZodType<T>) =>
+    request(endpoint, schema, { method: 'DELETE' }),
 };
