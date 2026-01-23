@@ -15,3 +15,6 @@ Thumbs.db
 
 # 日志
 *.log
+
+# 持久化数据
+data/
