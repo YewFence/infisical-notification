@@ -40,6 +40,24 @@ infisical-notification/
 
 👉 详细信息请查看 [notification/README.md](./notification/README.md)
 
+## 安全注意事项
+
+> ⚠️ **重要提示**：本项目的后端 API 不包含身份验证机制，任何能访问服务的人都可以增删改查待办事项。
+
+**推荐的部署方式：**
+
+1. **Tailscale / ZeroTier 等 VPN**：将服务部署在私有网络中，仅允许 VPN 内的设备访问
+2. **Cloudflare Access / Authentik**：在反向代理层添加身份验证，保护整个应用
+3. **内网部署**：仅在本地局域网中运行，不暴露到公网
+
+**关于 Webhook 端点：**
+
+`/api/webhook` 端点需要公开暴露以接收 Infisical 的回调。该端点已实现签名验证，只接受携带正确签名的请求，因此即使暴露也是安全的。
+
+如需公网部署，请确保：
+- 配置正确的 `INFISICAL_WEBHOOK_SECRET` 环境变量
+- 使用 HTTPS（可通过 Cloudflare 等服务实现）
+
 ## 快速开始
 
 ### 本地开发
