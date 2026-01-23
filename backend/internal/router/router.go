@@ -42,9 +42,17 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 	}
 
 	// 注册全局中间件：
-	// gin.Logger(): 将请求日志输出到控制台。
+	// gin.LoggerWithConfig(): 将请求日志输出到控制台，跳过健康检查端点。
 	// gin.Recovery(): 捕获任何 panic，防止程序崩溃，并返回 500 错误。
-	engine.Use(gin.Logger(), gin.Recovery())
+	engine.Use(gin.LoggerWithConfig(gin.LoggerConfig{
+		SkipPaths: []string{"/health"},
+	}), gin.Recovery())
+
+	// 健康检查端点，用于容器编排和负载均衡器探测
+	// 放在全局中间件之后、业务路由之前
+	engine.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
 	// 添加请求体大小限制中间件
 	engine.Use(middleware.BodySizeLimit(cfg.MaxBodySize))

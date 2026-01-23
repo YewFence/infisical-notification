@@ -6,8 +6,11 @@ services:
     ports:
       - "${NGINX_PORT:-5473}:${NGINX_PORT:-5473}"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - yewtally-net
 
   backend:
     image: ghcr.io/yewfence/infisical-notification-backend:latest
@@ -16,3 +19,15 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - yewtally-net
+
+networks:
+  yewtally-net:
+    driver: bridge
