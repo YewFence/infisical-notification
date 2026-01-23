@@ -126,13 +126,13 @@ func decodeSignature(signature string) ([]byte, error) {
 	// 移除可能的前缀
 	trimmed = strings.TrimPrefix(trimmed, "sha256=")
 
-	// 尝试 Hex 解码
-	if decoded, err := hex.DecodeString(trimmed); err == nil {
+	// 尝试 Base64 解码
+	if decoded, err := base64.StdEncoding.DecodeString(trimmed); err == nil {
 		return decoded, nil
 	}
 
-	// 尝试 Base64 解码
-	if decoded, err := base64.StdEncoding.DecodeString(trimmed); err == nil {
+	// 尝试 Hex 解码
+	if decoded, err := hex.DecodeString(trimmed); err == nil {
 		return decoded, nil
 	}
 
