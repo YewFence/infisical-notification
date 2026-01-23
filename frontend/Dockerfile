@@ -12,5 +12,6 @@ RUN pnpm build
 # 阶段2: nginx 运行
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+ENV NGINX_PORT=5473
+EXPOSE 5473

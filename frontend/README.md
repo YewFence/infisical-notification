@@ -46,6 +46,7 @@
 |--------|------|--------|
 | `VITE_API_BASE_URL` | 后端 API 地址 | `http://localhost:8080/api/todos` |
 | `VITE_POLL_INTERVAL_SECONDS` | 轮询间隔（秒） | `30` |
+| `NGINX_PORT` | Nginx 监听端口（Docker 部署） | `5473` |
 
 ## 构建部署
 
