@@ -176,7 +176,7 @@ function App() {
           <div className="flex items-center gap-3 mb-2">
             <Box className="w-8 h-8 text-accent" strokeWidth={1.5} />
             <h1 className="text-2xl font-bold text-textMain tracking-tight">
-              Project Tasks
+              YewTally
             </h1>
           </div>
           <p className="text-textMuted text-sm max-w-2xl">
@@ -198,7 +198,7 @@ function App() {
           <div className="flex items-center gap-3 mb-2">
             <Box className="w-8 h-8 text-accent" strokeWidth={1.5} />
             <h1 className="text-2xl font-bold text-textMain tracking-tight">
-              Project Tasks
+              YewTally
             </h1>
           </div>
           <p className="text-textMuted text-sm max-w-2xl">
@@ -234,7 +234,7 @@ function App() {
         <div className="flex items-center gap-3 mb-2">
            <Box className="w-8 h-8 text-accent" strokeWidth={1.5} />
            <h1 className="text-2xl font-bold text-textMain tracking-tight hover:underline decoration-accent underline-offset-4 cursor-pointer">
-             Project Tasks
+             YewTally
            </h1>
         </div>
         <p className="text-textMuted text-sm max-w-2xl">

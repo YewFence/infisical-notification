@@ -1,4 +1,4 @@
-# Yewyard Tasks 前端
+# YewTally 前端
 
 一个简洁的任务管理 Web 应用，基于 React 19 + TypeScript + Tailwind CSS v4 构建。
 

@@ -40,7 +40,7 @@ setTasks(prev => {
 界面文本中英文混用，不一致：
 - `CreateTaskModal.tsx:51` - 中文："创建新的任务"
 - `CreateTaskModal.tsx:64` - 中文："Secret 路径"
-- `App.tsx:207` - 英文："Project Tasks"
+- `App.tsx:207` - 英文："YewTally"
 - `App.tsx:235` - 英文："Search by task..."
 - `TaskTable.tsx:85` - 英文："No tasks found"
 
