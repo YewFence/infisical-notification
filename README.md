@@ -66,7 +66,7 @@ infisical-notification/
 docker compose -f compose.dev.yaml up --build
 ```
 
-访问 http://localhost 即可。
+访问 http://localhost:${TODO_BIND_ADDR} 即可。
 
 #### 生产部署
 
@@ -74,11 +74,17 @@ docker compose -f compose.dev.yaml up --build
 
 可以参考 [compose.yaml](./compose.prod.example) 文件。
 
-2. 配置环境变量：
+2. 创建数据目录：
+
+```bash
+mkdir data
+```
+
+3. 配置环境变量：
 
 创建 `.env` 文件，参考 [.env.prod.example](./.env.prod.example)。
 
-3. 拉取并启动：
+4. 拉取并启动：
 
 ```bash
 docker compose pull && docker compose up -d

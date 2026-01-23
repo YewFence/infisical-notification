@@ -10,10 +10,12 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server .
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
-COPY --from=builder /app/server .
 
-# 默认生产环境，可通过 docker compose 环境变量覆盖
+# 默认环境变量
 ENV APP_ENV=prod
+ENV TODO_DB_PATH=/app/data/todos.db
+
+COPY --from=builder /app/server .
 
 EXPOSE 8080
 CMD ["./server"]
