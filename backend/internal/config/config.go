@@ -76,6 +76,8 @@ func Load() (Config, error) {
 	// 环境变量未设置时输出警告
 	if cfg.Environment == "" {
 		slog.Warn("APP_ENV 环境变量未设置，默认使用开发环境 (development)")
+	} else if !(cfg.IsDevelopment() || cfg.IsProduction()) {
+		slog.Warn("APP_ENV 环境变量值无效，默认使用开发环境 (development)", "value", cfg.Environment)
 	}
 
 	if cfg.DBPath == "" {
@@ -111,6 +113,12 @@ func Load() (Config, error) {
 			if trimmed := strings.TrimSpace(origin); trimmed != "" {
 				cfg.CORSAllowedOrigins = append(cfg.CORSAllowedOrigins, trimmed)
 			}
+		}
+	} else {
+		if cfg.IsDevelopment() {
+			slog.Info("CORS_ALLOWED_ORIGINS 未设置，开发模式允许 localhost 和 127.0.0.1 的所有端口")
+		} else if cfg.IsProduction() {
+			slog.Warn("CORS_ALLOWED_ORIGINS 未设置，将不允许任何跨域请求")
 		}
 	}
 
