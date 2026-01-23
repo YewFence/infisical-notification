@@ -110,8 +110,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onToggleStatus, onD
                 </div>
 
                 {/* Actions Column */}
-                <div className="col-span-1 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
+                <div className="col-span-1 flex justify-end opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">                  <button
                     onClick={() => setDeletingTaskId(task.id)}
                     className="p-1.5 rounded hover:bg-white/10 text-textMuted hover:text-red-400 transition-colors"
                   >

@@ -23,7 +23,7 @@ jobs:
         run: |
           # 去掉 v 前缀，如 v1.0.0 -> 1.0.0
           VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Container registry
         uses: docker/login-action@v3

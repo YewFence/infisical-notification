@@ -8,7 +8,7 @@
 
 Infisical Webhook 接口使用 HMAC-SHA256 签名验证机制，签名需要基于以下信息动态计算：
 
-- **签名格式**: `t=<timestamp>,v1=<signature>`
+- **签名格式**: `t=<timestamp>,sha256=<signature>`
 - **计算方式**: `signature = HMAC-SHA256(secret, timestamp + "." + requestBody)`
 - **密钥来源**: 环境变量 `INFISICAL_WEBHOOK_SECRET`
 
@@ -28,7 +28,7 @@ Infisical Webhook 接口使用 HMAC-SHA256 签名验证机制，签名需要基�
 
 ```javascript
 // 1. 获取 webhook secret
-const secret = pm.environment.get("WEBHOOK_SECRET") || "your_secret_here";
+const secret = pm.environment.get("INFISICAL_WEBHOOK_SECRET") || "your_secret_here";
 
 // 2. 获取当前时间戳（秒）
 const timestamp = Math.floor(Date.now() / 1000);

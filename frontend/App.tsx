@@ -16,7 +16,10 @@ import {
 } from 'lucide-react';
 
 // 从环境变量读取轮询间隔，默认 30 秒
-const POLL_INTERVAL_SECONDS = parseInt(import.meta.env.VITE_POLL_INTERVAL_SECONDS || '30', 10);
+const rawInterval = import.meta.env.VITE_POLL_INTERVAL_SECONDS;
+const parsedInterval = Number(rawInterval ?? 30);
+const POLL_INTERVAL_SECONDS =
+  Number.isFinite(parsedInterval) && parsedInterval > 0 ? parsedInterval : 30;
 const POLL_INTERVAL_MS = POLL_INTERVAL_SECONDS * 1000;
 
 function App() {

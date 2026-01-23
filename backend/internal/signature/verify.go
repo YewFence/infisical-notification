@@ -98,6 +98,10 @@ func parseSignatureHeader(headerValue string) (int64, string, error) {
 // isTimestampFresh 检查时间戳是否在允许的误差范围内。
 func isTimestampFresh(timestamp int64, now time.Time) bool {
 	signedAt := time.Unix(timestamp, 0)
+	if timestamp <= 0 {
+		return false
+	}
+
 	if signedAt.IsZero() {
 		return false
 	}

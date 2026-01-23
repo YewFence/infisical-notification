@@ -44,7 +44,15 @@ async function request<T>(
       },
     });
 
-    const json = await response.json();
+    let json: unknown;
+    try {
+      json = await response.json();
+    } catch {
+      throw new ApiException(
+        response.status,
+        response.ok ? 'Invalid JSON response' : `HTTP ${response.status}`
+      );
+    }
 
     if (!response.ok) {
       const errorResult = ApiErrorSchema.safeParse(json);
