@@ -21,6 +21,12 @@ import (
 // NewRouter 构造并配置 Gin 引擎。
 // 这里进行了依赖注入：将 repo 注入到 handlers，再将 handlers 注册到路由。
 func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
+	// 根据环境设置 Gin 运行模式
+	// 生产环境使用 release 模式，关闭调试日志
+	if cfg.IsProduction() {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	// gin.New() 创建一个空白的 Gin 实例，不包含任何默认中间件。
 	// 相比 gin.Default()，这给了我们更多的定制空间。
 	engine := gin.New()
