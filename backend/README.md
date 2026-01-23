@@ -96,7 +96,7 @@ cp .env.example .env
 | `APP_ENV` | 运行环境（development/dev 或 production/prod） | `development` | 否 |
 | `INFISICAL_WEBHOOK_SECRET` | Infisical Webhook 签名验证密钥 | 无 | 使用 Webhook 时必需 |
 | `TODO_DB_PATH` | SQLite 数据库文件路径 | `backend/data/todos.db` 或 `data/todos.db` | 否 |
-| `TODO_BIND_ADDR` | HTTP 服务监听地址 | `:8080` | 否 |
+| `TODO_BIND_ADDR` | HTTP 服务监听端口号 | `8080` | 否 |
 | `TODO_MAX_BODY_SIZE` | 请求体最大大小（字节） | `10485760`（10MB） | 否 |
 | `CORS_ALLOWED_ORIGINS` | 允许的跨域来源，多个用逗号分隔 | 开发环境自动允许 localhost | 否 |
 
@@ -108,7 +108,7 @@ cp .env.example .env
 ```bash
 APP_ENV=development
 INFISICAL_WEBHOOK_SECRET=your_secret_key_here
-TODO_BIND_ADDR=:8080
+TODO_BIND_ADDR=8080
 TODO_MAX_BODY_SIZE=10485760
 CORS_ALLOWED_ORIGINS=https://example.com,https://app.example.com
 ```
@@ -117,7 +117,7 @@ CORS_ALLOWED_ORIGINS=https://example.com,https://app.example.com
 ```powershell
 $env:APP_ENV="development"
 $env:INFISICAL_WEBHOOK_SECRET="your_secret_key_here"
-$env:TODO_BIND_ADDR=":8080"
+$env:TODO_BIND_ADDR="8080"
 $env:TODO_MAX_BODY_SIZE="10485760"
 $env:CORS_ALLOWED_ORIGINS="https://example.com,https://app.example.com"
 ```

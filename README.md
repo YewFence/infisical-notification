@@ -90,7 +90,7 @@ docker compose -f compose.dev.yaml up --build
 
 1. 创建 `compose.yaml`：
 
-可以参考 [compose.yaml](./compose.prod.example) 文件。
+可以参考 [compose.yaml](./compose.yaml) 文件。
 
 2. 创建数据目录：
 
