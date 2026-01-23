@@ -54,10 +54,11 @@ func main() {
 	if len(cfg.CORSAllowedOrigins) > 0 {
 		corsDisplay = strings.Join(cfg.CORSAllowedOrigins, ", ")
 	}
-	slog.Info("服务配置已加载:")
-	slog.Info("- 环境模式: ", cfg.Environment)
-	slog.Info("- 监听地址: ", cfg.BindAddr)
-	slog.Info("- CORS域名: ", corsDisplay)
+	slog.Info("服务配置已加载",
+		"environment", cfg.Environment,
+		"bind_addr", cfg.BindAddr,
+		"cors_origins", corsDisplay,
+	)
 
 	// 2. 初始化数据库连接
 	// 使用 GORM 连接 SQLite 数据库。
