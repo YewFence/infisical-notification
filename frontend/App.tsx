@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { TaskTable } from './components/TaskTable';
 import { CreateTaskModal } from './components/CreateTaskModal';
+import { ToastContainer } from './components/Toast';
 import { Task } from './types';
 import { todoService } from './services/todoService';
 import { ApiException } from './services/api';
 import { usePolling } from './hooks/usePolling';
+import { useToast } from './hooks/useToast';
 import {
   Box,
   Search,
@@ -22,6 +24,9 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Toast 通知
+  const toast = useToast();
 
   // 用于追踪是否有用户操作正在进行
   const isUserActionRef = useRef(false);
@@ -98,7 +103,7 @@ function App() {
       // 回滚
       setTasks(prev => prev.map(t => t.id === id ? task : t));
       if (err instanceof ApiException) {
-        alert(`操作失败: ${err.message}`);
+        toast.error(`操作失败: ${err.message}`);
       }
     } finally {
       // 恢复轮询
@@ -130,7 +135,7 @@ function App() {
         return newTasks;
       });
       if (err instanceof ApiException) {
-        alert(`删除失败: ${err.message}`);
+        toast.error(`删除失败: ${err.message}`);
       }
     } finally {
       // 恢复轮询
@@ -149,7 +154,7 @@ function App() {
       setTasks(prev => [...prev, created]);
     } catch (err) {
       if (err instanceof ApiException) {
-        alert(`创建失败: ${err.message}`);
+        toast.error(`创建失败: ${err.message}`);
       }
     } finally {
       // 恢复轮询
@@ -246,6 +251,9 @@ function App() {
         onClose={() => setIsModalOpen(false)}
         onConfirm={addTask}
       />
+
+      {/* Toast 通知 */}
+      <ToastContainer toasts={toast.toasts} onClose={toast.removeToast} />
     </Layout>
   );
 }
