@@ -11,5 +11,9 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
 COPY --from=builder /app/server .
+
+# 默认生产环境，可通过 docker compose 环境变量覆盖
+ENV APP_ENV=prod
+
 EXPOSE 8080
 CMD ["./server"]
