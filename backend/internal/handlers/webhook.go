@@ -75,8 +75,10 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 		return
 	}
 
-	bodyText := strings.TrimSpace(string(bodyBytes))
-	if bodyText == "" {
+	// 使用原始 body 进行签名验证，不要 TrimSpace
+	// Infisical 签名是基于原始字节计算的，任何修改都会导致签名不匹配
+	bodyText := string(bodyBytes)
+	if strings.TrimSpace(bodyText) == "" {
 		RespondError(c, http.StatusBadRequest, "empty body")
 		return
 	}
@@ -124,7 +126,8 @@ func (h *WebhookHandler) Handle(c *gin.Context) {
 	// 提取 secretPath，如果没有则默认为根路径 "/"
 	secretPath := strings.TrimSpace(payload.Project.SecretPath)
 	if secretPath == "" {
-		secretPath = "/"
+		RespondError(c, http.StatusBadRequest, "secretPath in webhook payload is required and cannot be empty")
+		return
 	}
 
 	// 更新或插入 Todo 项

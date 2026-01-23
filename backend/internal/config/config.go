@@ -13,8 +13,8 @@ import (
 // defaultBindPort 定义默认的监听端口。
 // defaultMaxBodySize 定义默认的请求体大小限制（10MB）。
 const (
-	defaultBindPort     = "8080"
-	defaultMaxBodySize  = 10 << 20 // 10MB
+	defaultBindPort    = "8080"
+	defaultMaxBodySize = 10 << 20 // 10MB
 )
 
 // Config 结构体定义了所有可配置的参数。
@@ -96,6 +96,7 @@ func Load() (Config, error) {
 		if size, err := strconv.ParseInt(maxBodySizeStr, 10, 64); err == nil && size > 0 {
 			cfg.MaxBodySize = size
 		} else {
+			slog.Warn("TODO_MAX_BODY_SIZE 配置无效，使用默认值", "value", maxBodySizeStr)
 			cfg.MaxBodySize = defaultMaxBodySize
 		}
 	} else {

@@ -38,7 +38,9 @@ func Open(path string) (*gorm.DB, error) {
 	db, err := gorm.Open(sqlite.Dialector{
 		DriverName: "sqlite", // modernc.org/sqlite 注册的驱动名
 		DSN:        path,
-	}, &gorm.Config{})
+	}, &gorm.Config{
+		TranslateError: true, // 将数据库驱动的原始错误翻译为 GORM 标准错误（如 ErrDuplicatedKey）
+	})
 	if err != nil {
 		return nil, err
 	}
