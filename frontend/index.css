@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* 使用 class 控制暗色模式，而不是系统偏好 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 自定义主题变量 */
+@theme {
+  /* 字体 */
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* 自定义颜色 - 使用 camelCase 以匹配现有代码 */
+  --color-background: #0a0a0a;
+  --color-surface: #111111;
+  --color-surfaceHighlight: #161616;
+  --color-border: #27272a;
+  --color-accent: #dfff00;
+  --color-accentDim: rgba(223, 255, 0, 0.1);
+  --color-textMain: #ededed;
+  --color-textMuted: #a1a1aa;
+
+  /* 自定义动画 */
+  --animate-fade-in: fade-in 0.5s ease-out;
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* 基础样式 */
+body {
+  background-color: #050505;
+  color: #ededed;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}

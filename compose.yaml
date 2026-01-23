@@ -1,0 +1,18 @@
+services:
+  frontend:
+    image: ghcr.io/yewfence/infisical-notification-frontend:latest
+    container_name: yewtally-frontend
+    env_file: .env
+    ports:
+      - "${NGINX_PORT:-5473}:${NGINX_PORT:-5473}"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/yewfence/infisical-notification-backend:latest
+    container_name: yewtally-backend
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

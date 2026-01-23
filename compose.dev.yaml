@@ -1,0 +1,21 @@
+# 本地开发/测试用，从源码构建
+services:
+  frontend:
+    build: ./frontend
+    container_name: yewtally-frontend
+    env_file: .env
+    ports:
+      - "${NGINX_PORT:-5473}:${NGINX_PORT:-5473}"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: yewtally-backend
+    env_file: .env
+    ports:
+      - "${TODO_BIND_ADDR:-8080}:${TODO_BIND_ADDR:-8080}"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

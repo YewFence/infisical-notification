@@ -1,0 +1,279 @@
+basePath: /api/todos
+definitions:
+  handlers.todoInput:
+    properties:
+      secretPath:
+        description: 反射标签指定了 JSON 字段名。
+        type: string
+    type: object
+  handlers.webhookPayload:
+    properties:
+      event:
+        type: string
+      project:
+        properties:
+          environment:
+            type: string
+          projectId:
+            description: 以下字段目前未使用，但保留方便将来扩展
+            type: string
+          projectName:
+            type: string
+          reminderNote:
+            type: string
+          secretName:
+            type: string
+          secretPath:
+            type: string
+        type: object
+      timestamp:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: 这是一个接收 Infisical Webhook 通知并管理 Todo 任务的后端服务
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Infisical Notification API
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有待办事项的列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回待办事项列表
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取待办事项列表
+      tags:
+      - todos
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的待办事项
+      parameters:
+      - description: 待办事项信息
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.todoInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回创建的待办事项
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: 密钥路径已存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 创建待办事项
+      tags:
+      - todos
+  /{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定 ID 的待办事项
+      parameters:
+      - description: 待办事项 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功删除
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 待办事项不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 删除待办事项
+      tags:
+      - todos
+    get:
+      consumes:
+      - application/json
+      description: 根据 ID 获取单个待办事项的详细信息
+      parameters:
+      - description: 待办事项 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回待办事项
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 待办事项不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取单个待办事项
+      tags:
+      - todos
+    patch:
+      consumes:
+      - application/json
+      description: 切换指定 ID 的待办事项的完成状态（已完成↔未完成）
+      parameters:
+      - description: 待办事项 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回切换后的待办事项
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 待办事项不存在
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 切换待办事项完成状态
+      tags:
+      - todos
+  /webhook:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        接收来自 Infisical 的 Webhook 通知并创建或更新待办事项
+        注意：此接口使用 HMAC-SHA256 签名验证，需要在 X-Infisical-Signature 头中提供正确的签名
+        签名格式：t=<timestamp>,v1=<signature>，其中 signature = HMAC-SHA256(secret, timestamp + "." + requestBody)
+        secret 通过环境变量 INFISICAL_WEBHOOK_SECRET 配置
+      parameters:
+      - description: Webhook 签名（格式：t=timestamp,v1=signature）
+        in: header
+        name: X-Infisical-Signature
+        required: true
+        type: string
+      - description: Webhook 载荷
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.webhookPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功处理 Webhook
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: 签名验证失败
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 接收 Infisical Webhook
+      tags:
+      - webhook
+schemes:
+- http
+- https
+swagger: "2.0"

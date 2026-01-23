@@ -1,0 +1,8 @@
+tmp
+data
+.git
+*.md
+.env
+.env.*
+.air.toml
+docs/*.md
