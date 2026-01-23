@@ -108,8 +108,10 @@ function App() {
   };
 
   const deleteTask = async (id: string) => {
-    const taskToDelete = tasks.find(t => t.id === id);
-    if (!taskToDelete) return;
+    const taskIndex = tasks.findIndex(t => t.id === id);
+    if (taskIndex === -1) return;
+
+    const taskToDelete = tasks[taskIndex];
 
     // 暂停轮询
     isUserActionRef.current = true;
@@ -121,8 +123,12 @@ function App() {
     try {
       await todoService.delete(id);
     } catch (err) {
-      // 回滚
-      setTasks(prev => [...prev, taskToDelete]);
+      // 回滚到原来的位置
+      setTasks(prev => {
+        const newTasks = [...prev];
+        newTasks.splice(taskIndex, 0, taskToDelete);
+        return newTasks;
+      });
       if (err instanceof ApiException) {
         alert(`删除失败: ${err.message}`);
       }
