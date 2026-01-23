@@ -73,7 +73,11 @@ async function request<T>(
     return result.data.data;
   } catch (error) {
     if (error instanceof ApiException) throw error;
-    throw new ApiException(0, error instanceof Error ? error.message : 'Network error');
+    const wrappedError = new ApiException(0, error instanceof Error ? error.message : 'Network error');
+    if (error instanceof Error) {
+      wrappedError.cause = error;
+    }
+    throw wrappedError;
   }
 }
 
