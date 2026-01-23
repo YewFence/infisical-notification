@@ -1,0 +1,17 @@
+name: Build All
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-frontend:
+    uses: ./.github/workflows/frontend.yml
+    permissions:
+      contents: read
+      packages: write
+
+  build-backend:
+    uses: ./.github/workflows/backend.yml
+    permissions:
+      contents: read
+      packages: write
