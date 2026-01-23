@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Layout } from './components/Layout';
 import { TaskTable } from './components/TaskTable';
+import { TableSkeleton } from './components/TableSkeleton';
 import { CreateTaskModal } from './components/CreateTaskModal';
 import { ToastContainer } from './components/Toast';
 import { Task } from './types';
@@ -170,9 +171,21 @@ function App() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-textMuted">加载中...</div>
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Box className="w-8 h-8 text-accent" strokeWidth={1.5} />
+            <h1 className="text-2xl font-bold text-textMain tracking-tight">
+              Project Tasks
+            </h1>
+          </div>
+          <p className="text-textMuted text-sm max-w-2xl">
+            管理你的待办事项,跟踪任务进度和优先级。
+          </p>
         </div>
+
+        {/* Skeleton Table */}
+        <TableSkeleton rows={5} />
       </Layout>
     );
   }
@@ -180,14 +193,35 @@ function App() {
   if (error) {
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center h-64">
-          <div className="text-red-400 mb-4">{error}</div>
-          <button
-            onClick={loadTasks}
-            className="px-4 py-2 bg-accent text-black rounded hover:bg-accent/80"
-          >
-            重试
-          </button>
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Box className="w-8 h-8 text-accent" strokeWidth={1.5} />
+            <h1 className="text-2xl font-bold text-textMain tracking-tight">
+              Project Tasks
+            </h1>
+          </div>
+          <p className="text-textMuted text-sm max-w-2xl">
+            管理你的待办事项,跟踪任务进度和优先级。
+          </p>
+        </div>
+
+        {/* Error State */}
+        <div className="w-full overflow-x-auto">
+          <div className="min-w-[900px] border-t border-border">
+            <div className="py-16 flex flex-col items-center justify-center border-b border-border">
+              <div className="w-12 h-12 mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+                <span className="text-red-400 text-xl">!</span>
+              </div>
+              <p className="text-red-400 mb-4">{error}</p>
+              <button
+                onClick={loadTasks}
+                className="px-4 py-2 bg-accent text-black rounded hover:bg-accent/80 transition-colors"
+              >
+                重试
+              </button>
+            </div>
+          </div>
         </div>
       </Layout>
     );
