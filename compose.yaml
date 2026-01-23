@@ -1,0 +1,19 @@
+services:
+  frontend:
+    image: ghcr.io/yewfence/infisical-notification-frontend:latest
+    container_name: yewtally-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    image: ghcr.io/yewfence/infisical-notification-backend:latest
+    container_name: yewtally-backend
+    volumes:
+      - ./data:/app/data
+    environment:
+      - BIND_ADDR=:8080
+      # - WEBHOOK_SECRET=your-webhook-secret
+    restart: unless-stopped
