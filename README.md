@@ -84,7 +84,7 @@ infisical-notification/
 docker compose -f compose.dev.yaml up --build
 ```
 
-访问 http://localhost:${TODO_BIND_ADDR} 即可。
+访问 http://localhost:5473 (或你在 .env 中配置的 TODO_BIND_ADDR 端口) 即可。
 
 #### 生产部署
 
