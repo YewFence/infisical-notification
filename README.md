@@ -1,22 +1,117 @@
-Infisical 通知转发器（Appwrite）
+# Infisical Notification
 
-这是一个很小巧的 Appwrite Function：接收 Infisical 的 webhook，校验签名后只处理 `secrets.modified` 和 `test` 事件，并把消息转发到你自定义的 Apprise。
+一个轻量级的 Todo 清单应用，可接收 Infisical Webhook 自动创建待办事项。当密钥变更时，自动提醒你需要同步更新哪些服务，确保不会遗漏任何操作。
 
-主要流程
-- 接收 Infisical webhook 请求
-- 校验 `x-infisical-signature` 签名与时间窗
-- 解析事件与路径，渲染消息模板
-- 调用 Apprise API 推送通知
+## 项目结构
 
-环境变量（必须）
-- `INFISICAL_WEBHOOK_SECRET`: Infisical Webhook Secret，用于签名校验
-- `APPRISE_URL`: Apprise 服务地址（接收 JSON 的 API 端点）
-- `NOTIFICATION_URLS`: Apprise 目标 URL 列表（按 Apprise 规范填写）
+```
+infisical-notification/
+├── backend/          # Go 后端服务
+├── frontend/         # React 前端应用
+├── notification/     # Appwrite Function 通知转发器（计划整合）
+└── docs/             # API 文档
+```
 
-消息模板
-- 模板文件：`notification/message.md`
-- 会注入 `SecretPath`，用于展示本次变更的路径
+## 组件说明
 
-备注
-- 只处理事件：`secrets.modified` `test`
-- 非法签名或无效负载会直接返回错误信息
+### Backend
+
+基于 Go + Gin + GORM 的 RESTful API 服务，负责：
+- 接收 Infisical Webhook 并验证签名
+- 管理待办事项（Todo）的 CRUD 操作
+- 提供 Swagger API 文档
+
+👉 详细信息请查看 [backend/README.md](./backend/README.md)
+
+### Frontend
+
+基于 React 19 + TypeScript + Tailwind CSS v4 的 Web 应用，功能包括：
+- 任务列表展示与搜索
+- 任务状态管理
+- 乐观更新与 Toast 通知
+
+👉 详细信息请查看 [frontend/README.md](./frontend/README.md)
+
+### Notification（计划整合）
+
+基于 Appwrite Function 的通知转发器，负责：
+- 接收 Infisical Webhook 并校验签名
+- 将密钥变更事件转发到 Apprise 通知服务
+
+👉 详细信息请查看 [notification/README.md](./notification/README.md)
+
+## 快速开始
+
+### 本地开发
+
+1. **启动后端**
+   ```bash
+   cd backend
+   go run main.go
+   ```
+
+2. **启动前端**
+   ```bash
+   cd frontend
+   pnpm install && pnpm dev
+   ```
+
+详细配置和开发说明请参阅各组件的 README。
+
+### Docker 部署
+
+#### 本地构建测试
+
+```bash
+docker compose -f compose.dev.yaml up --build
+```
+
+访问 http://localhost 即可。
+
+#### 生产部署
+
+1. 创建 `compose.yaml`：
+
+可以参考 [compose.yaml](./compose.prod.example) 文件。
+
+2. 配置环境变量：
+
+创建 `.env` 文件，参考 [.env.prod.example](./.env.prod.example)。
+
+3. 拉取并启动：
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+#### 镜像版本
+
+| 镜像 | 说明 |
+|------|------|
+| `ghcr.io/yewfence/infisical-notification-frontend:latest` | 前端最新版 |
+| `ghcr.io/yewfence/infisical-notification-backend:latest` | 后端最新版 |
+| `...:1.0.0` | 指定版本号 |
+| `...:main` | main 分支构建 |
+| `...:feature-web` | feature/web 分支构建 |
+
+## CI/CD
+
+项目使用 GitHub Actions 自动构建 Docker 镜像：
+
+| 工作流 | 触发条件 | 说明 |
+|-------|---------|------|
+| Build Frontend | push main (frontend/**) / 手动 | 构建前端镜像 |
+| Build Backend | push main (backend/**) / 手动 | 构建后端镜像 |
+| Build All | 手动 | 同时构建前后端 |
+| Release | 推送 v* 标签 | 构建镜像 + 创建 GitHub Release |
+
+**发布新版本：**
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+## 许可证
+
+MIT

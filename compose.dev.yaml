@@ -3,6 +3,7 @@ services:
   frontend:
     build: ./frontend
     container_name: yewtally-frontend
+    env_file: .env
     ports:
       - "80:80"
     depends_on:
@@ -12,9 +13,7 @@ services:
   backend:
     build: ./backend
     container_name: yewtally-backend
+    env_file: .env
     volumes:
       - ./data:/app/data
-    environment:
-      - BIND_ADDR=:8080
-      # - WEBHOOK_SECRET=your-webhook-secret
     restart: unless-stopped
