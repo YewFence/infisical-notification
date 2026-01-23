@@ -21,6 +21,12 @@ import (
 // NewRouter 构造并配置 Gin 引擎。
 // 这里进行了依赖注入：将 repo 注入到 handlers，再将 handlers 注册到路由。
 func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
+	// 根据环境设置 Gin 运行模式
+	// 生产环境使用 release 模式，关闭调试日志
+	if cfg.IsProduction() {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	// gin.New() 创建一个空白的 Gin 实例，不包含任何默认中间件。
 	// 相比 gin.Default()，这给了我们更多的定制空间。
 	engine := gin.New()
@@ -36,9 +42,17 @@ func NewRouter(cfg config.Config, repo *repo.TodoRepository) *gin.Engine {
 	}
 
 	// 注册全局中间件：
-	// gin.Logger(): 将请求日志输出到控制台。
+	// gin.LoggerWithConfig(): 将请求日志输出到控制台，跳过健康检查端点。
 	// gin.Recovery(): 捕获任何 panic，防止程序崩溃，并返回 500 错误。
-	engine.Use(gin.Logger(), gin.Recovery())
+	engine.Use(gin.LoggerWithConfig(gin.LoggerConfig{
+		SkipPaths: []string{"/health"},
+	}), gin.Recovery())
+
+	// 健康检查端点，用于容器编排和负载均衡器探测
+	// 放在全局中间件之后、业务路由之前
+	engine.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
 	// 添加请求体大小限制中间件
 	engine.Use(middleware.BodySizeLimit(cfg.MaxBodySize))
