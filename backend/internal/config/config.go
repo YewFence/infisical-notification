@@ -10,11 +10,10 @@ import (
 	"strings"
 )
 
-// defaultBindAddr 定义默认的监听地址和端口。
-// ":8080" 表示监听所有网卡的 8080 端口。
+// defaultBindPort 定义默认的监听端口。
 // defaultMaxBodySize 定义默认的请求体大小限制（10MB）。
 const (
-	defaultBindAddr     = ":8080"
+	defaultBindPort     = "8080"
 	defaultMaxBodySize  = 10 << 20 // 10MB
 )
 
@@ -83,7 +82,12 @@ func Load() (Config, error) {
 		cfg.DBPath = defaultDBPath()
 	}
 	if cfg.BindAddr == "" {
-		cfg.BindAddr = defaultBindAddr
+		cfg.BindAddr = ":" + defaultBindPort
+	} else {
+		// 如果只传了端口号，自动加上冒号
+		if !strings.Contains(cfg.BindAddr, ":") {
+			cfg.BindAddr = ":" + cfg.BindAddr
+		}
 	}
 
 	// 加载请求体大小限制配置

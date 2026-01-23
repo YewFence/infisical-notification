@@ -14,6 +14,8 @@ services:
     build: ./backend
     container_name: yewtally-backend
     env_file: .env
+    ports:
+      - "${TODO_BIND_ADDR:-8080}:${TODO_BIND_ADDR:-8080}"
     volumes:
       - ./data:/app/data
     restart: unless-stopped

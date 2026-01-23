@@ -5,4 +5,4 @@ data
 .env
 .env.*
 .air.toml
-docs
+docs/*.md
