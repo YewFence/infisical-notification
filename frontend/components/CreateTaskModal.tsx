@@ -67,9 +67,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               type="text"
               value={path}
               onChange={(e) => setPath(e.target.value)}
-              placeholder="例如: /app/database/password"
+              placeholder="例如: /app/database/credential"
               className="w-full bg-surfaceHighlight border border-border rounded px-3 py-2 text-textMain placeholder:text-textMuted/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
               autoFocus
+              autoComplete="off"
             />
             <p className="mt-2 text-xs text-textMuted leading-relaxed">
               请输入要监控的 Secret 路径
